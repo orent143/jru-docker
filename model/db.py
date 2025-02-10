@@ -5,15 +5,15 @@ db_config = {
     "host": "localhost",
     "user": "root",
     "password": "",
-    "database": "web2_grp0",
-    "port": 3306,
+    "database": "jru_system",
+    "port": 3307,
 }
 
 def get_db():
     db = mysql.connector.connect(**db_config)
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)  # Returns results as dictionaries
     try:
-        yield cursor, db
+        yield cursor
     finally:
         cursor.close()
         db.close()

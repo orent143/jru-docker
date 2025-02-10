@@ -1,106 +1,128 @@
-# model/users.py
-from fastapi import Depends, HTTPException, APIRouter, Form
+from fastapi import Depends, HTTPException, APIRouter
+from pydantic import BaseModel
+from typing import List, Optional
 from .db import get_db
-import bcrypt
 
-UsersRouter = APIRouter(tags=["Users"])
+router = APIRouter()
 
-# CRUD operations
+# Pydantic Models
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str  # Stored as plain text for now (not recommended)
+    role: str  # Should be 'student', 'faculty', or 'admin'
 
-@UsersRouter.get("/users/", response_model=list)
-async def read_users(
-    db=Depends(get_db)
-):
-    query = "SELECT id, username FROM users"
-    db[0].execute(query)
-    users = [{"id": user[0], "username": user[1]} for user in db[0].fetchall()]
-    return users
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[str] = None
 
-@UsersRouter.get("/users/{user_id}", response_model=dict)
-async def read_user(
-    user_id: int, 
-    db=Depends(get_db)
-):
-    query = "SELECT id, username FROM users WHERE id = %s"
-    db[0].execute(query, (user_id,))
-    user = db[0].fetchone()
-    if user:
-        return {"id": user[0], "username": user[1]}
-    raise HTTPException(status_code=404, detail="User not found")
+class UserResponse(BaseModel):
+    user_id: int
+    name: str
+    email: str
+    role: str
+    created_at: str
 
-@UsersRouter.post("/users/", response_model=dict)
-async def create_user(
-    email: str = Form(...), 
-    username: str = Form(...), 
-    password: str = Form(...), 
-    db=Depends(get_db)
-):
-    # Hash the password using bcrypt
-    hashed_password = hash_password(password)
+# 🚀 Get all users (READ)
+@router.get("/users/", response_model=List[UserResponse])
+async def get_users(db=Depends(get_db)):
+    query = "SELECT user_id, name, email, role, created_at FROM users"
+    db.execute(query)
+    users = db.fetchall()
+    return [
+        {"user_id": user[0], "name": user[1], "email": user[2], "role": user[3], "created_at": str(user[4])}
+        for user in users
+    ]
 
-    query = "INSERT INTO users (email, username, password) VALUES (%s, %s, %s)"
-    db[0].execute(query, (email, username, hashed_password))
-
-    # Retrieve the last inserted ID using LAST_INSERT_ID()
-    db[0].execute("SELECT LAST_INSERT_ID()")
-    new_user_id = db[0].fetchone()[0]
-    db[1].commit()
-
-    return {"id": new_user_id, "username": username}
-
-@UsersRouter.put("/users/{user_id}", response_model=dict)
-async def update_user(
-    user_id: int,
-    email: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...),
-    db=Depends(get_db)
-):
-    # Hash the password using bcrypt
-    hashed_password = hash_password(password)
-
-    # Update user information in the database 
-    query = "UPDATE users SET email = %s, username = %s, password = %s WHERE id = %s"
-    db[0].execute(query, (email, username, hashed_password, user_id))
-
-    # Check if the update was successful
-    if db[0].rowcount > 0:
-        db[1].commit()
-        return {"message": "User updated successfully"}
+# 🚀 Get a single user by ID (READ)
+@router.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(user_id: int, db=Depends(get_db)):
+    query = "SELECT user_id, name, email, role, created_at FROM users WHERE user_id = %s"
+    db.execute(query, (user_id,))
+    user = db.fetchone()
     
-    # If no rows were affected, user not found
+    if user:
+        return {
+            "user_id": user[0],
+            "name": user[1],
+            "email": user[2],
+            "role": user[3],
+            "created_at": str(user[4])
+        }
+    
     raise HTTPException(status_code=404, detail="User not found")
 
-@UsersRouter.delete("/users/{user_id}", response_model=dict)
-async def delete_user(
-    user_id: int,
-    db=Depends(get_db)
-):
+# 🚀 Create a new user (CREATE)
+@router.post("/users/", response_model=UserResponse)
+async def create_user(user: UserCreate, db=Depends(get_db)):
+    query = "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)"
+    values = (user.name, user.email, user.password, user.role)
+
     try:
-        # Check if the user exists
-        query_check_user = "SELECT id FROM users WHERE id = %s"
-        db[0].execute(query_check_user, (user_id,))
-        existing_user = db[0].fetchone()
-
-        if not existing_user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Delete the user
-        query_delete_user = "DELETE FROM users WHERE id = %s"
-        db[0].execute(query_delete_user, (user_id,))
-        db[1].commit()
-
-        return {"message": "User deleted successfully"}
+        db.execute(query, values)
+        db.connection.commit()
+        user_id = db.lastrowid  # Get the inserted user's ID
     except Exception as e:
-        # Handle other exceptions if necessary
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
-    finally:
-        # Close the database cursor
-        db[0].close()
+        raise HTTPException(status_code=400, detail=f"Error creating user: {str(e)}")
 
-# Password hashing function using bcrypt
-def hash_password(password: str):
-    # Generate a salt and hash the password
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password.decode('utf-8')  # Decode bytes to string for storage
+    return {
+        "user_id": user_id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "created_at": "Just now"
+    }
+
+# 🚀 Update a user (UPDATE)
+@router.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: int, user: UserUpdate, db=Depends(get_db)):
+    query = "SELECT user_id FROM users WHERE user_id = %s"
+    db.execute(query, (user_id,))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_fields = []
+    values = []
+
+    if user.name:
+        update_fields.append("name = %s")
+        values.append(user.name)
+    if user.email:
+        update_fields.append("email = %s")
+        values.append(user.email)
+    if user.password:
+        update_fields.append("password = %s")
+        values.append(user.password)
+    if user.role:
+        update_fields.append("role = %s")
+        values.append(user.role)
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    query = f"UPDATE users SET {', '.join(update_fields)} WHERE user_id = %s"
+    values.append(user_id)
+
+    try:
+        db.execute(query, tuple(values))
+        db.connection.commit()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating user: {str(e)}")
+
+    return await get_user(user_id, db)
+
+# 🚀 Delete a user (DELETE)
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: int, db=Depends(get_db)):
+    query = "SELECT user_id FROM users WHERE user_id = %s"
+    db.execute(query, (user_id,))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="User not found")
+
+    query = "DELETE FROM users WHERE user_id = %s"
+    db.execute(query, (user_id,))
+    db.connection.commit()
+
+    return {"message": "User deleted successfully"}
