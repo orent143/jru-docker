@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from model.users import router as users_router
 from model.courses import router as courses_router
 from model.course_materials import router as course_materials_router
@@ -14,6 +15,15 @@ from model.students import router as students_router
 from model.instructors import router as instructors_router
 
 app = FastAPI()
+
+# Enable CORS to allow frontend to access the backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Allow requests from frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Register Routers with Tags
 app.include_router(users_router, prefix="/api", tags=["Users"])
