@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, APIRouter
 from pydantic import BaseModel
 from typing import List, Optional
 from .db import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -9,8 +10,8 @@ router = APIRouter()
 class UserCreate(BaseModel):
     name: str
     email: str
-    password: str  # Stored as plain text for now (not recommended)
-    role: str  # Should be 'student', 'faculty', or 'admin'
+    password: str 
+    role: str  
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
@@ -27,14 +28,26 @@ class UserResponse(BaseModel):
 
 # 🚀 Get all users (READ)
 @router.get("/users/", response_model=List[UserResponse])
-async def get_users(db=Depends(get_db)):
-    query = "SELECT user_id, name, email, role, created_at FROM users"
-    db.execute(query)
-    users = db.fetchall()
-    return [
-        {"user_id": user[0], "name": user[1], "email": user[2], "role": user[3], "created_at": str(user[4])}
-        for user in users
-    ]
+async def get_users(db_dep=Depends(get_db)):
+    try:
+        db, conn = db_dep  
+        query = "SELECT user_id, name, email, role, created_at FROM users"
+        db.execute(query)
+        users = db.fetchall()
+        
+        return [
+            {
+                "user_id": user["user_id"],
+                "name": user["name"],
+                "email": user["email"],
+                "role": user["role"],
+                "created_at": str(user["created_at"])
+            }
+            for user in users
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 # 🚀 Get a single user by ID (READ)
 @router.get("/users/{user_id}", response_model=UserResponse)
@@ -56,15 +69,18 @@ async def get_user(user_id: int, db=Depends(get_db)):
 
 # 🚀 Create a new user (CREATE)
 @router.post("/users/", response_model=UserResponse)
-async def create_user(user: UserCreate, db=Depends(get_db)):
+async def create_user(user: UserCreate, db_dep=Depends(get_db)):
+    db, conn = db_dep  
+
     query = "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)"
     values = (user.name, user.email, user.password, user.role)
 
     try:
         db.execute(query, values)
-        db.connection.commit()
-        user_id = db.lastrowid  # Get the inserted user's ID
+        conn.commit()  
+        user_id = db.lastrowid  
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating user: {str(e)}")
 
     return {
@@ -76,42 +92,32 @@ async def create_user(user: UserCreate, db=Depends(get_db)):
     }
 
 # 🚀 Update a user (UPDATE)
-@router.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: UserUpdate, db=Depends(get_db)):
+@router.put("/users/{user_id}")
+async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_db)):
+    db, conn = db_dep  
+
     query = "SELECT user_id FROM users WHERE user_id = %s"
     db.execute(query, (user_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
 
-    update_fields = []
-    values = []
+    update_data = {key: value for key, value in user_update.dict().items() if value is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields provided for update")
 
-    if user.name:
-        update_fields.append("name = %s")
-        values.append(user.name)
-    if user.email:
-        update_fields.append("email = %s")
-        values.append(user.email)
-    if user.password:
-        update_fields.append("password = %s")
-        values.append(user.password)
-    if user.role:
-        update_fields.append("role = %s")
-        values.append(user.role)
+    set_clause = ", ".join(f"{key} = %s" for key in update_data.keys())
+    values = list(update_data.values()) + [user_id]
 
-    if not update_fields:
-        raise HTTPException(status_code=400, detail="No fields to update")
-
-    query = f"UPDATE users SET {', '.join(update_fields)} WHERE user_id = %s"
-    values.append(user_id)
+    query = f"UPDATE users SET {set_clause} WHERE user_id = %s"
 
     try:
-        db.execute(query, tuple(values))
-        db.connection.commit()
+        db.execute(query, values)
+        conn.commit()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error updating user: {str(e)}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    return await get_user(user_id, db)
+    return {"message": "User updated successfully"}
 
 # 🚀 Delete a user (DELETE)
 @router.delete("/users/{user_id}")
