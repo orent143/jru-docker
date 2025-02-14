@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 12, 2025 at 12:27 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Generation Time: Feb 10, 2025 at 04:35 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -62,31 +62,7 @@ CREATE TABLE `courses` (
   `course_id` int(11) NOT NULL,
   `course_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `faculty_id` int(11) DEFAULT NULL,
-  `instructor_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `courses`
---
-
-INSERT INTO `courses` (`course_id`, `course_name`, `description`, `faculty_id`, `instructor_id`) VALUES
-(2, 'ITELECT3', 'BSCS-3A', NULL, 7),
-(3, 'CC322', 'BSCS-3B', NULL, 8),
-(4, 'ITELECT4', 'BSCS-3A', NULL, 8);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `course_content`
---
-
-CREATE TABLE `course_content` (
-  `content_id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `faculty_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -101,8 +77,7 @@ CREATE TABLE `course_materials` (
   `title` varchar(255) NOT NULL,
   `content` text DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
-  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `instructor_id` int(11) DEFAULT NULL
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -163,18 +138,12 @@ CREATE TABLE `grades` (
 CREATE TABLE `instructors` (
   `instructor_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `employee_number` varchar(50) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
   `hire_date` date DEFAULT curdate(),
   `department` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `instructors`
---
-
-INSERT INTO `instructors` (`instructor_id`, `user_id`, `name`, `hire_date`, `department`) VALUES
-(7, 21, 'faculty', '2025-02-11', 'Unknown Department'),
-(8, 22, 'geric', '2025-02-11', 'Unknown Department');
 
 -- --------------------------------------------------------
 
@@ -250,15 +219,6 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
-(9, 'admin', 'admin@admin', 'string', 'admin', '2025-02-11 19:20:17'),
-(21, 'faculty', 'faculty@123', 'faculty', 'faculty', '2025-02-12 10:30:40'),
-(22, 'geric', 'geric@2', 'heric', 'faculty', '2025-02-12 11:14:03');
-
---
 -- Indexes for dumped tables
 --
 
@@ -282,23 +242,14 @@ ALTER TABLE `assignment_submissions`
 --
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`course_id`),
-  ADD KEY `faculty_id` (`faculty_id`),
-  ADD KEY `instructor_id` (`instructor_id`);
-
---
--- Indexes for table `course_content`
---
-ALTER TABLE `course_content`
-  ADD PRIMARY KEY (`content_id`),
-  ADD KEY `course_id` (`course_id`);
+  ADD KEY `faculty_id` (`faculty_id`);
 
 --
 -- Indexes for table `course_materials`
 --
 ALTER TABLE `course_materials`
   ADD PRIMARY KEY (`material_id`),
-  ADD KEY `course_id` (`course_id`),
-  ADD KEY `instructor_id` (`instructor_id`);
+  ADD KEY `course_id` (`course_id`);
 
 --
 -- Indexes for table `exams`
@@ -331,7 +282,8 @@ ALTER TABLE `grades`
 --
 ALTER TABLE `instructors`
   ADD PRIMARY KEY (`instructor_id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+  ADD UNIQUE KEY `user_id` (`user_id`),
+  ADD UNIQUE KEY `employee_number` (`employee_number`);
 
 --
 -- Indexes for table `quizzes`
@@ -391,13 +343,7 @@ ALTER TABLE `assignment_submissions`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `course_content`
---
-ALTER TABLE `course_content`
-  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_materials`
@@ -427,7 +373,7 @@ ALTER TABLE `grades`
 -- AUTO_INCREMENT for table `instructors`
 --
 ALTER TABLE `instructors`
-  MODIFY `instructor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `instructor_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
@@ -457,7 +403,7 @@ ALTER TABLE `student_courses`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -480,21 +426,13 @@ ALTER TABLE `assignment_submissions`
 -- Constraints for table `courses`
 --
 ALTER TABLE `courses`
-  ADD CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `courses_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`) ON DELETE SET NULL;
-
---
--- Constraints for table `course_content`
---
-ALTER TABLE `course_content`
-  ADD CONSTRAINT `course_content_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `course_materials`
 --
 ALTER TABLE `course_materials`
-  ADD CONSTRAINT `course_materials_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `course_materials_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`);
+  ADD CONSTRAINT `course_materials_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `exams`
