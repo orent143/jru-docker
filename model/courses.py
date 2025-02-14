@@ -26,34 +26,6 @@ class CourseUpdate(BaseModel):
     user_id: int  # Updated field
     class_schedule: str
 
-def create_default_assignment(course_id, user_id, cursor):
-    # Check if the user_id exists
-    cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
-    user = cursor.fetchone()
-    
-    if not user:
-        raise HTTPException(status_code=400, detail="User ID does not exist in the users table.")
-
-    query = """
-        INSERT INTO assignments (course_id, user_id, title, description, due_date)
-        VALUES (%s, %s, %s, %s, NOW() + INTERVAL 7 DAY)
-    """
-    cursor.execute(query, (course_id, user_id, "Default Assignment", "This is a default assignment."))
-    
-def create_default_quiz(course_id, user_id, cursor):
-    # Check if the user_id exists
-    cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
-    user = cursor.fetchone()
-    
-    if not user:
-        raise HTTPException(status_code=400, detail="User ID does not exist in the users table.")
-
-    query = """
-        INSERT INTO quizzes (course_id, user_id, title, description, due_date)
-        VALUES (%s, %s, %s, %s, NOW() + INTERVAL 7 DAY)
-    """
-    cursor.execute(query, (course_id, user_id, "Default Quiz", "This is a default quiz."))
-
 
 
 # ✅ CREATE (POST)
@@ -81,9 +53,7 @@ async def create_course(course: CourseCreate, db=Depends(get_db)):
             raise HTTPException(status_code=500, detail="Failed to retrieve course ID.")
         
         # ✅ Correctly indented line
-        create_default_assignment(course_id, course.user_id, cursor)
         
-        return {"message": "Course and default assignment created successfully", "course_id": course_id}
     
     except Exception as e:
         connection.rollback()
