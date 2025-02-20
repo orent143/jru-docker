@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 12, 2025 at 12:27 PM
+-- Generation Time: Feb 20, 2025 at 10:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -29,12 +29,24 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `assignments` (
   `assignment_id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
+  `course_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `due_date` datetime DEFAULT NULL,
+  `description` text NOT NULL,
+  `due_date` datetime NOT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `assignments`
+--
+
+INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`) VALUES
+(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52'),
+(25, 18, 'asda', 'gui', '2025-11-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:01:28'),
+(26, 23, 'qasas', 'asas', '2222-02-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:43:45'),
+(27, 29, 'ads2', '3qeq', '1111-11-11 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:56:23');
 
 -- --------------------------------------------------------
 
@@ -61,19 +73,41 @@ CREATE TABLE `assignment_submissions` (
 CREATE TABLE `courses` (
   `course_id` int(11) NOT NULL,
   `course_name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `faculty_id` int(11) DEFAULT NULL,
-  `instructor_id` int(11) DEFAULT NULL
+  `section` varchar(255) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `class_schedule` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `courses`
 --
 
-INSERT INTO `courses` (`course_id`, `course_name`, `description`, `faculty_id`, `instructor_id`) VALUES
-(2, 'ITELECT3', 'BSCS-3A', NULL, 7),
-(3, 'CC322', 'BSCS-3B', NULL, 8),
-(4, 'ITELECT4', 'BSCS-3A', NULL, 8);
+INSERT INTO `courses` (`course_id`, `course_name`, `section`, `user_id`, `class_schedule`) VALUES
+(18, 'ITELECT3', 'BSCS-3l', 22, 'MON: 1:00pm to 4:00pm'),
+(19, 'ITELECT4', 'BSCS-3D', 23, 'MON'),
+(20, 'ITELECT4', 'BSCS-3D', 23, 'MON'),
+(21, 'SAS', 'SA', 23, 'string'),
+(22, 'SAS', 'SA', 23, 'string'),
+(23, 'asas', 'asas', 22, 'asa'),
+(24, 'asas', 'asas', 22, 'MON'),
+(25, 'asas', 'asas', 22, 'MON'),
+(26, '212', 'string', 22, 'string'),
+(27, '212', 'string', 22, 'string'),
+(28, '212', 'string', 22, 'string'),
+(29, 'qwerty', 'IT', 22, 'MON'),
+(30, 'ITERA', 'CMBS', 23, 'FRI'),
+(31, 'ITERA', 'CMBS', 23, 'FRI'),
+(32, 'sssss', 'ssss', 22, 'sat'),
+(33, 'sssss', 'ssss', 22, 'sat'),
+(34, 'string', 'string', 22, 'string'),
+(35, 'string', 'string', 22, 'string'),
+(36, 'Sample Course', 'A', 22, 'MWF 10-11am'),
+(37, 'hieee', 'string', 22, 'string'),
+(38, 'hieee', 'string', NULL, 'string'),
+(39, 'ddddddddddd', 'string', NULL, 'saa'),
+(40, 'NET121', 'BSIT', 23, 'WED'),
+(41, 'PROG1', 'BSIS', 23, 'THU'),
+(55, 'PROG2', 'BSIS', 23, 'SAT');
 
 -- --------------------------------------------------------
 
@@ -86,8 +120,21 @@ CREATE TABLE `course_content` (
   `course_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `file_path` varchar(255) DEFAULT NULL,
+  `instructor_name` varchar(255) DEFAULT NULL,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_content`
+--
+
+INSERT INTO `course_content` (`content_id`, `course_id`, `title`, `content`, `created_at`, `file_path`, `instructor_name`, `user_id`) VALUES
+(9, 18, 'string', 'string', '2025-02-13 21:23:52', 'uploads\\Integrating+Modern+Management+Tools+In+Education.pdf', NULL, 22),
+(10, 19, 'wa lageeee', 'aAAAA', '2025-02-13 21:34:05', 'uploads\\jru_system.sql', NULL, 23),
+(11, 20, 'HAHHAHAHA', 'HUHUHUHUH', '2025-02-13 23:36:37', 'uploads\\jru_system.sql', NULL, 23),
+(12, 23, 'AAAAAAAAA', 'VVVVVVV', '2025-02-13 23:53:53', 'uploads\\(TEXAS) Week 5-Activity 2 - Sheet1.csv', NULL, 22);
 
 -- --------------------------------------------------------
 
@@ -102,7 +149,9 @@ CREATE TABLE `course_materials` (
   `content` text DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `instructor_id` int(11) DEFAULT NULL
+  `instructor_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `content_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -117,8 +166,20 @@ CREATE TABLE `exams` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `exam_date` datetime DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `duration_minutes` int(11) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exams`
+--
+
+INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`, `created_at`, `duration_minutes`, `file_path`, `user_id`) VALUES
+(1, 22, 'string', 'string', '0000-00-00 00:00:00', '2025-02-20 08:25:10', 11, 'uploads\\Gultiano_IT321_Task4.pdf', 23),
+(2, 18, 'WQWAAAA', 'jhjkhjkh', '2020-11-22 00:00:00', '2025-02-20 08:31:57', 30, 'uploads\\Gultiano_IT321_Task4.pdf', 22),
+(3, 23, 'QWERTY', 'hujhfhjb', '2222-02-22 00:00:00', '2025-02-20 08:44:08', 20, 'uploads\\Gultiano_IT3A_Task2.docx', 22);
 
 -- --------------------------------------------------------
 
@@ -174,7 +235,8 @@ CREATE TABLE `instructors` (
 
 INSERT INTO `instructors` (`instructor_id`, `user_id`, `name`, `hire_date`, `department`) VALUES
 (7, 21, 'faculty', '2025-02-11', 'Unknown Department'),
-(8, 22, 'geric', '2025-02-11', 'Unknown Department');
+(8, 22, 'geric', '2025-02-11', 'Unknown Department'),
+(9, 23, 'gi', '2025-02-12', 'Unknown Department');
 
 -- --------------------------------------------------------
 
@@ -187,8 +249,20 @@ CREATE TABLE `quizzes` (
   `course_id` int(11) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `quiz_date` date DEFAULT NULL,
+  `duration_minutes` int(11) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quizzes`
+--
+
+INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_at`, `quiz_date`, `duration_minutes`, `file_path`, `user_id`) VALUES
+(1, 18, 'string', 'string', '2025-02-20 09:15:03', '0000-00-00', 30, 'uploads\\Gultiano_IT3A_Task2.docx', 22),
+(2, 25, 'asas', 'asa', '2025-02-20 09:22:59', '2222-02-22', 30, 'uploads\\Gultiano_IT321_PrelimExam_Part2.pdf', 22);
 
 -- --------------------------------------------------------
 
@@ -221,6 +295,15 @@ CREATE TABLE `students` (
   `enrollment_date` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `last_name`, `enrollment_date`) VALUES
+(1, 24, '', 'mykkkk', '', '2025-02-13'),
+(5, 29, 'SN000029', 'asd', '', '2025-02-13'),
+(6, 30, 'SN000030', 'John', 'Doe', '2025-02-13');
+
 -- --------------------------------------------------------
 
 --
@@ -233,6 +316,16 @@ CREATE TABLE `student_courses` (
   `course_id` int(11) DEFAULT NULL,
   `enrolled_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_courses`
+--
+
+INSERT INTO `student_courses` (`enrollment_id`, `student_id`, `course_id`, `enrolled_at`) VALUES
+(10, 24, 18, '2025-02-14 04:06:52'),
+(11, 27, 18, '2025-02-14 04:06:56'),
+(12, 29, 19, '2025-02-14 04:24:50'),
+(13, 27, 19, '2025-02-14 04:24:55');
 
 -- --------------------------------------------------------
 
@@ -256,7 +349,13 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
 (9, 'admin', 'admin@admin', 'string', 'admin', '2025-02-11 19:20:17'),
 (21, 'faculty', 'faculty@123', 'faculty', 'faculty', '2025-02-12 10:30:40'),
-(22, 'geric', 'geric@2', 'heric', 'faculty', '2025-02-12 11:14:03');
+(22, 'geric', 'geric@2', 'heric', 'faculty', '2025-02-12 11:14:03'),
+(23, 'gi', 'gi@1', 'gi', 'faculty', '2025-02-13 06:35:57'),
+(24, 'mykkkk', 'student@1', 'myk', 'student', '2025-02-14 01:31:34'),
+(27, 'gelo', 'gelo@3', 'gelo', 'student', '2025-02-14 03:32:23'),
+(28, 'coy', 'coy@4', 'coy', 'student', '2025-02-14 03:38:40'),
+(29, 'asd', 'asd@asd', '12', 'student', '2025-02-14 03:43:33'),
+(30, 'John Doe', 'john.doe@example.com', 'aa', 'student', '2025-02-14 03:44:11');
 
 --
 -- Indexes for dumped tables
@@ -267,7 +366,8 @@ INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `created_at
 --
 ALTER TABLE `assignments`
   ADD PRIMARY KEY (`assignment_id`),
-  ADD KEY `course_id` (`course_id`);
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `assignment_submissions`
@@ -282,8 +382,7 @@ ALTER TABLE `assignment_submissions`
 --
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`course_id`),
-  ADD KEY `faculty_id` (`faculty_id`),
-  ADD KEY `instructor_id` (`instructor_id`);
+  ADD KEY `fk_courses_users` (`user_id`);
 
 --
 -- Indexes for table `course_content`
@@ -298,7 +397,9 @@ ALTER TABLE `course_content`
 ALTER TABLE `course_materials`
   ADD PRIMARY KEY (`material_id`),
   ADD KEY `course_id` (`course_id`),
-  ADD KEY `instructor_id` (`instructor_id`);
+  ADD KEY `instructor_id` (`instructor_id`),
+  ADD KEY `content_id` (`content_id`),
+  ADD KEY `fk_course_materials_user` (`user_id`);
 
 --
 -- Indexes for table `exams`
@@ -379,7 +480,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `assignment_submissions`
@@ -391,13 +492,13 @@ ALTER TABLE `assignment_submissions`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `course_content`
 --
 ALTER TABLE `course_content`
-  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `course_materials`
@@ -409,7 +510,7 @@ ALTER TABLE `course_materials`
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `exam_submissions`
@@ -427,13 +528,13 @@ ALTER TABLE `grades`
 -- AUTO_INCREMENT for table `instructors`
 --
 ALTER TABLE `instructors`
-  MODIFY `instructor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `instructor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `quiz_submissions`
@@ -445,19 +546,19 @@ ALTER TABLE `quiz_submissions`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Constraints for dumped tables
@@ -467,7 +568,8 @@ ALTER TABLE `users`
 -- Constraints for table `assignments`
 --
 ALTER TABLE `assignments`
-  ADD CONSTRAINT `assignments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `assignments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `assignments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `assignment_submissions`
@@ -480,8 +582,7 @@ ALTER TABLE `assignment_submissions`
 -- Constraints for table `courses`
 --
 ALTER TABLE `courses`
-  ADD CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `courses_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `fk_courses_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `course_content`
@@ -494,7 +595,9 @@ ALTER TABLE `course_content`
 --
 ALTER TABLE `course_materials`
   ADD CONSTRAINT `course_materials_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `course_materials_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`);
+  ADD CONSTRAINT `course_materials_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`),
+  ADD CONSTRAINT `course_materials_ibfk_3` FOREIGN KEY (`content_id`) REFERENCES `course_content` (`content_id`),
+  ADD CONSTRAINT `fk_course_materials_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `exams`
@@ -548,7 +651,7 @@ ALTER TABLE `students`
 -- Constraints for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_courses_fk` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE;
 COMMIT;
 
