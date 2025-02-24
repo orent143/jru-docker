@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter, Path, Form, File, UploadFile
+from fastapi import Depends, HTTPException, APIRouter, Form, File, UploadFile
 from pydantic import BaseModel
 import os
 from .db import get_db
@@ -48,7 +48,8 @@ async def create_assignment(
             buffer.write(file.file.read())
 
     # Insert into database
-    query = "INSERT INTO assignments (course_id, title, description, due_date, file_path, user_id) VALUES (%s, %s, %s, %s, %s, %s)"
+    query = ("INSERT INTO assignments (course_id, title, description, due_date, file_path, user_id) "
+             "VALUES (%s, %s, %s, %s, %s, %s)")
     cursor.execute(query, (course_id, title, description, due_date, file_path, user_id))
     connection.commit()
 
@@ -62,7 +63,7 @@ async def create_assignment(
         "user_id": user_id
     }
 
-# ✅ READ (GET)
+# ✅ READ (GET) - Get assignments by course
 @router.get("/assignments/{course_id}")
 async def get_assignments(course_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -98,22 +99,34 @@ async def get_assignments(course_id: int, db=Depends(get_db)):
         ]
     }
 
-# ✅ GET SINGLE ASSIGNMENT
+# ✅ GET SINGLE ASSIGNMENT with file URL
 @router.get("/assignments/item/{assignment_id}")
 async def get_assignment(assignment_id: int, db=Depends(get_db)):
     cursor, _ = db
-    query = "SELECT assignment_id, title, description, due_date FROM assignments WHERE assignment_id = %s"
+    query = """
+        SELECT assignment_id, title, description, due_date, file_path 
+        FROM assignments 
+        WHERE assignment_id = %s
+    """
     cursor.execute(query, (assignment_id,))
     assignment = cursor.fetchone()
 
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
+    # Construct file URL if file_path exists
+    file_url = ""
+    if assignment["file_path"]:
+        normalized_path = assignment["file_path"].replace("\\", "/")
+        file_url = f"http://127.0.0.1:8000/{normalized_path}"
+
     return {
         "assignment_id": assignment["assignment_id"],
         "title": assignment["title"],
         "description": assignment["description"],
-        "due_date": assignment["due_date"]
+        "due_date": assignment["due_date"],
+        "file_path": assignment["file_path"],
+        "file_url": file_url
     }
 
 # ✅ UPDATE (PUT)
@@ -137,3 +150,4 @@ async def delete_assignment(assignment_id: int, db=Depends(get_db)):
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Assignment not found")
     return {"message": "Assignment deleted successfully"}
+    

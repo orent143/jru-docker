@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 20, 2025 at 10:25 AM
+-- Generation Time: Feb 17, 2025 at 10:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -43,10 +43,7 @@ CREATE TABLE `assignments` (
 --
 
 INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`) VALUES
-(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52'),
-(25, 18, 'asda', 'gui', '2025-11-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:01:28'),
-(26, 23, 'qasas', 'asas', '2222-02-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:43:45'),
-(27, 29, 'ads2', '3qeq', '1111-11-11 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:56:23');
+(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52');
 
 -- --------------------------------------------------------
 
@@ -166,20 +163,8 @@ CREATE TABLE `exams` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `exam_date` datetime DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `duration_minutes` int(11) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `exams`
---
-
-INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`, `created_at`, `duration_minutes`, `file_path`, `user_id`) VALUES
-(1, 22, 'string', 'string', '0000-00-00 00:00:00', '2025-02-20 08:25:10', 11, 'uploads\\Gultiano_IT321_Task4.pdf', 23),
-(2, 18, 'WQWAAAA', 'jhjkhjkh', '2020-11-22 00:00:00', '2025-02-20 08:31:57', 30, 'uploads\\Gultiano_IT321_Task4.pdf', 22),
-(3, 23, 'QWERTY', 'hujhfhjb', '2222-02-22 00:00:00', '2025-02-20 08:44:08', 20, 'uploads\\Gultiano_IT3A_Task2.docx', 22);
 
 -- --------------------------------------------------------
 
@@ -249,20 +234,8 @@ CREATE TABLE `quizzes` (
   `course_id` int(11) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `quiz_date` date DEFAULT NULL,
-  `duration_minutes` int(11) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `quizzes`
---
-
-INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_at`, `quiz_date`, `duration_minutes`, `file_path`, `user_id`) VALUES
-(1, 18, 'string', 'string', '2025-02-20 09:15:03', '0000-00-00', 30, 'uploads\\Gultiano_IT3A_Task2.docx', 22),
-(2, 25, 'asas', 'asa', '2025-02-20 09:22:59', '2222-02-22', 30, 'uploads\\Gultiano_IT321_PrelimExam_Part2.pdf', 22);
 
 -- --------------------------------------------------------
 
@@ -480,7 +453,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `assignment_submissions`
@@ -510,7 +483,7 @@ ALTER TABLE `course_materials`
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `exam_submissions`
@@ -534,7 +507,7 @@ ALTER TABLE `instructors`
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `quiz_submissions`
