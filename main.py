@@ -7,10 +7,8 @@ from model.course_content import router as course_content_router
 from model.course_materials import router as course_materials_router
 from model.assignmentmaterial import router as assignmentmaterial_router
 from model.exams import router as exams_router
-from model.exammaterial import router as exammaterial_router
 from model.exam_submissions import router as exam_submissions_router
 from model.quizzes import router as quizzes_router
-from model.quizmaterial import router as quizmaterial_router
 from model.quiz_submissions import router as quiz_submissions_router
 from model.student_courses import router as student_courses_router
 from model.studentassignment import router as studentassignment_router
@@ -39,10 +37,8 @@ app.include_router(course_content_router, prefix="/api", tags=["Courses Content"
 app.include_router(course_materials_router, prefix="/api", tags=["Course Materials"])
 app.include_router(assignmentmaterial_router, prefix="/api", tags=["Assignments Materials"])
 app.include_router(exams_router, prefix="/api", tags=["Exams"])
-app.include_router(exammaterial_router, prefix="/api", tags=["Exam Material"])
 app.include_router(exam_submissions_router, prefix="/api", tags=["Exam Submissions"])
 app.include_router(quizzes_router, prefix="/api", tags=["Quizzes"])
-app.include_router(quizmaterial_router, prefix="/api", tags=["Quiz Material"])
 app.include_router(quiz_submissions_router, prefix="/api", tags=["Quiz Submissions"])
 app.include_router(student_courses_router, prefix="/api", tags=["Student Courses"])
 app.include_router(studentassignment_router, prefix="/api", tags=["Student Assignments"])

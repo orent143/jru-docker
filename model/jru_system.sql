@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 20, 2025 at 10:25 AM
+-- Generation Time: Mar 31, 2025 at 02:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -35,18 +35,25 @@ CREATE TABLE `assignments` (
   `due_date` datetime NOT NULL,
   `file_path` varchar(255) DEFAULT NULL,
   `user_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `external_link` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assignments`
 --
 
-INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`) VALUES
-(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52'),
-(25, 18, 'asda', 'gui', '2025-11-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:01:28'),
-(26, 23, 'qasas', 'asas', '2222-02-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:43:45'),
-(27, 29, 'ads2', '3qeq', '1111-11-11 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:56:23');
+INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`, `external_link`) VALUES
+(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52', NULL),
+(25, 18, 'asda', 'gui', '2025-11-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:01:28', NULL),
+(26, 23, 'qasas', 'asas', '2222-02-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:43:45', NULL),
+(27, 29, 'ads2', '3qeq', '1111-11-11 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:56:23', NULL),
+(28, 18, '12222', 'asa121', '1111-11-11 00:00:00', 'uploads\\Untitled design.jpg', 22, '2025-02-24 00:46:48', NULL),
+(29, 24, 'sakbiufiuop[k', 'jkuhgioihpo', '1111-11-11 00:00:00', 'uploads\\jru_system (2).sql', 22, '2025-02-24 08:37:57', NULL),
+(30, 36, 'aiugibi', 'honmoinoin', '1111-11-11 00:00:00', 'uploads\\Gultiano_TLA2.docx', 22, '2025-02-24 12:39:58', NULL),
+(31, 18, 'qwqw1', '111', '2025-03-31 00:00:00', 'https://forms.gle/FzBi16X5JbpMcdu77', 22, '2025-03-30 11:32:37', NULL),
+(32, 18, 'AHAHAHAHH', 'AHAHAHAH', '2025-03-31 00:00:00', '/uploads/inventory-summary-2025-03-11.csv', 22, '2025-03-31 02:34:50', NULL),
+(33, 18, 'HUIHUHUHUHU', 'HUHUHUHU', '2025-03-20 00:00:00', 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', 22, '2025-03-31 02:35:07', NULL);
 
 -- --------------------------------------------------------
 
@@ -134,7 +141,9 @@ INSERT INTO `course_content` (`content_id`, `course_id`, `title`, `content`, `cr
 (9, 18, 'string', 'string', '2025-02-13 21:23:52', 'uploads\\Integrating+Modern+Management+Tools+In+Education.pdf', NULL, 22),
 (10, 19, 'wa lageeee', 'aAAAA', '2025-02-13 21:34:05', 'uploads\\jru_system.sql', NULL, 23),
 (11, 20, 'HAHHAHAHA', 'HUHUHUHUH', '2025-02-13 23:36:37', 'uploads\\jru_system.sql', NULL, 23),
-(12, 23, 'AAAAAAAAA', 'VVVVVVV', '2025-02-13 23:53:53', 'uploads\\(TEXAS) Week 5-Activity 2 - Sheet1.csv', NULL, 22);
+(12, 23, 'AAAAAAAAA', 'VVVVVVV', '2025-02-13 23:53:53', 'uploads\\(TEXAS) Week 5-Activity 2 - Sheet1.csv', NULL, 22),
+(13, 24, 'asas', 'asasa', '2025-02-24 11:52:20', 'uploads\\jru_system.sql', NULL, 22),
+(14, 36, 'mv jhgi', 'jkvuyfyu', '2025-02-24 11:52:50', 'uploads\\Gultiano_TLA2.docx', NULL, 22);
 
 -- --------------------------------------------------------
 
@@ -169,17 +178,21 @@ CREATE TABLE `exams` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `duration_minutes` int(11) DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL
+  `user_id` int(11) DEFAULT NULL,
+  `external_link` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `exams`
 --
 
-INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`, `created_at`, `duration_minutes`, `file_path`, `user_id`) VALUES
-(1, 22, 'string', 'string', '0000-00-00 00:00:00', '2025-02-20 08:25:10', 11, 'uploads\\Gultiano_IT321_Task4.pdf', 23),
-(2, 18, 'WQWAAAA', 'jhjkhjkh', '2020-11-22 00:00:00', '2025-02-20 08:31:57', 30, 'uploads\\Gultiano_IT321_Task4.pdf', 22),
-(3, 23, 'QWERTY', 'hujhfhjb', '2222-02-22 00:00:00', '2025-02-20 08:44:08', 20, 'uploads\\Gultiano_IT3A_Task2.docx', 22);
+INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`, `created_at`, `duration_minutes`, `file_path`, `user_id`, `external_link`) VALUES
+(1, 22, 'string', 'string', '0000-00-00 00:00:00', '2025-02-20 08:25:10', 11, 'uploads\\Gultiano_IT321_Task4.pdf', 23, NULL),
+(2, 18, 'WQWAAAA', 'jhjkhjkh', '2020-11-22 00:00:00', '2025-02-20 08:31:57', 30, 'uploads\\Gultiano_IT321_Task4.pdf', 22, NULL),
+(3, 23, 'QWERTY', 'hujhfhjb', '2222-02-22 00:00:00', '2025-02-20 08:44:08', 20, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
+(4, 24, 'Prelim', 'jkbjhgskdjn', '2222-11-11 00:00:00', '2025-02-23 23:07:55', 30, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
+(5, 18, 'adfasda', 'dsasas', '1111-11-11 00:00:00', '2025-02-23 23:14:59', 11, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
+(6, 18, 'biuiouho', '\';pkm\';m', '2025-03-25 00:00:00', '2025-03-30 10:54:37', 30, 'https://forms.gle/FzBi16X5JbpMcdu77', 22, NULL);
 
 -- --------------------------------------------------------
 
@@ -252,17 +265,20 @@ CREATE TABLE `quizzes` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `quiz_date` date DEFAULT NULL,
   `duration_minutes` int(11) DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL
+  `user_id` int(11) DEFAULT NULL,
+  `external_link` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `quizzes`
 --
 
-INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_at`, `quiz_date`, `duration_minutes`, `file_path`, `user_id`) VALUES
-(1, 18, 'string', 'string', '2025-02-20 09:15:03', '0000-00-00', 30, 'uploads\\Gultiano_IT3A_Task2.docx', 22),
-(2, 25, 'asas', 'asa', '2025-02-20 09:22:59', '2222-02-22', 30, 'uploads\\Gultiano_IT321_PrelimExam_Part2.pdf', 22);
+INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_at`, `quiz_date`, `duration_minutes`, `user_id`, `external_link`) VALUES
+(2, 25, 'asas', 'asa', '2025-02-20 09:22:59', '2222-02-22', 30, 22, NULL),
+(3, 22, 'klhghlkj', 'kjhklhjlkj', '2025-02-23 10:21:33', '1111-11-11', 22, 23, NULL),
+(4, 37, 'asasa', 'sasa', '2025-02-24 00:43:21', '1111-11-11', 11, 22, NULL),
+(9, 18, 'string', 'string', '2025-03-30 09:33:32', '0000-00-00', 10, 22, 'https://forms.gle/fakWLQQgTLqboFrh8'),
+(10, 18, 'AHAHAHAHAH', 'LM, KLJBOIN', '2025-03-31 06:11:42', '0000-00-00', 20, 22, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform');
 
 -- --------------------------------------------------------
 
@@ -325,7 +341,9 @@ INSERT INTO `student_courses` (`enrollment_id`, `student_id`, `course_id`, `enro
 (10, 24, 18, '2025-02-14 04:06:52'),
 (11, 27, 18, '2025-02-14 04:06:56'),
 (12, 29, 19, '2025-02-14 04:24:50'),
-(13, 27, 19, '2025-02-14 04:24:55');
+(13, 27, 19, '2025-02-14 04:24:55'),
+(14, 27, 24, '2025-02-24 11:52:07'),
+(15, 27, 36, '2025-02-24 11:52:34');
 
 -- --------------------------------------------------------
 
@@ -480,7 +498,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `assignment_submissions`
@@ -498,7 +516,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `course_content`
 --
 ALTER TABLE `course_content`
-  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `course_materials`
@@ -510,7 +528,7 @@ ALTER TABLE `course_materials`
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `exam_submissions`
@@ -534,7 +552,7 @@ ALTER TABLE `instructors`
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `quiz_submissions`
@@ -552,7 +570,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users`

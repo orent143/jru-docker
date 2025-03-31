@@ -1,12 +1,14 @@
-from fastapi import Depends, HTTPException, APIRouter, Path, Form, File, UploadFile
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Form, File, UploadFile
 from pydantic import BaseModel
 import os
 from .db import get_db
+from fastapi.responses import JSONResponse
 
+# Create FastAPI app instance
+app = FastAPI()
+
+# Router for quiz-related operations
 router = APIRouter()
-
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure the directory exists
 
 # ✅ Schema
 class QuizCreate(BaseModel):
@@ -15,13 +17,16 @@ class QuizCreate(BaseModel):
     description: str
     quiz_date: str
     duration_minutes: int
+    external_link: str = None  # New field for the external link
 
 class QuizUpdate(BaseModel):
     title: str
     description: str
     quiz_date: str
     duration_minutes: int
+    external_link: str = None  # New field for the external link
 
+# ✅ CREATE QUIZ (POST)
 @router.post("/quizzes")
 async def create_quiz(
     course_id: int = Form(...),
@@ -29,7 +34,7 @@ async def create_quiz(
     description: str = Form(...),
     quiz_date: str = Form(...),
     duration_minutes: int = Form(...),
-    file: UploadFile = File(None),
+    external_link: str = Form(None),  # Accept external link as a form field
     db=Depends(get_db)
 ):
     cursor, connection = db
@@ -42,32 +47,27 @@ async def create_quiz(
 
     user_id = course["user_id"]
 
-    # Handle file upload
-    file_path = None
-    if file:
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
-        with open(file_path, "wb") as buffer:
-            buffer.write(file.file.read())
-
-    # Insert into database
-    query = "INSERT INTO quizzes (course_id, title, description, quiz_date, duration_minutes, file_path, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    cursor.execute(query, (course_id, title, description, quiz_date, duration_minutes, file_path, user_id))
+    # Insert into database without file_path
+    query = """
+    INSERT INTO quizzes (course_id, title, description, quiz_date, duration_minutes, external_link, user_id)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(query, (course_id, title, description, quiz_date, duration_minutes, external_link, user_id))
     connection.commit()
 
     quiz_id = cursor.lastrowid
+
     return {
         "quiz_id": quiz_id,
         "title": title,
         "description": description,
         "quiz_date": quiz_date,
         "duration_minutes": duration_minutes,
-        "file_path": file_path,
+        "external_link": external_link,  # Return the external link
         "user_id": user_id
     }
 
-# ✅ READ (GET)
-@router.get("/quizzes/{course_id}")
+@router.get("/quizzes/quizzes/{course_id}")
 async def get_quizzes(course_id: int, db=Depends(get_db)):
     cursor, _ = db
 
@@ -79,7 +79,7 @@ async def get_quizzes(course_id: int, db=Depends(get_db)):
     course_name = course["course_name"]
 
     cursor.execute("""
-        SELECT q.quiz_id, q.title, q.description, q.quiz_date, q.duration_minutes, q.file_path, u.name AS instructor_name 
+        SELECT q.quiz_id, q.title, q.description, q.quiz_date, q.duration_minutes, q.external_link, u.name AS instructor_name
         FROM quizzes q
         JOIN users u ON q.user_id = u.user_id
         WHERE q.course_id = %s
@@ -96,18 +96,18 @@ async def get_quizzes(course_id: int, db=Depends(get_db)):
                 "description": q["description"],
                 "quiz_date": q["quiz_date"],
                 "duration_minutes": q["duration_minutes"],
-                "file_path": q["file_path"],
+                "external_link": q["external_link"],  # Include the external link in the response
                 "instructor_name": q["instructor_name"]
             }
             for q in quizzes
         ]
     }
 
-# ✅ GET SINGLE QUIZ
+
 @router.get("/quizzes/item/{quiz_id}")
 async def get_quiz(quiz_id: int, db=Depends(get_db)):
     cursor, _ = db
-    query = "SELECT quiz_id, title, description, quiz_date, duration_minutes FROM quizzes WHERE quiz_id = %s"
+    query = "SELECT quiz_id, title, description, quiz_date, duration_minutes, external_link FROM quizzes WHERE quiz_id = %s"
     cursor.execute(query, (quiz_id,))
     quiz = cursor.fetchone()
 
@@ -119,15 +119,20 @@ async def get_quiz(quiz_id: int, db=Depends(get_db)):
         "title": quiz["title"],
         "description": quiz["description"],
         "quiz_date": quiz["quiz_date"],
-        "duration_minutes": quiz["duration_minutes"]
+        "duration_minutes": quiz["duration_minutes"],
+        "external_link": quiz["external_link"]  # Return the external link
     }
 
 # ✅ UPDATE (PUT)
 @router.put("/quizzes/{quiz_id}")
 async def update_quiz(quiz_id: int, quiz: QuizUpdate, db=Depends(get_db)):
     cursor, connection = db
-    query = "UPDATE quizzes SET title = %s, description = %s, quiz_date = %s, duration_minutes = %s WHERE quiz_id = %s"
-    cursor.execute(query, (quiz.title, quiz.description, quiz.quiz_date, quiz.duration_minutes, quiz_id))
+    query = """
+    UPDATE quizzes 
+    SET title = %s, description = %s, quiz_date = %s, duration_minutes = %s, external_link = %s
+    WHERE quiz_id = %s
+    """
+    cursor.execute(query, (quiz.title, quiz.description, quiz.quiz_date, quiz.duration_minutes, quiz.external_link, quiz_id))
     connection.commit()
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Quiz not found")
@@ -143,3 +148,6 @@ async def delete_quiz(quiz_id: int, db=Depends(get_db)):
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Quiz not found")
     return {"message": "Quiz deleted successfully"}
+
+# Include the router in the app
+app.include_router(router)
