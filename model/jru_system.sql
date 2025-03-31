@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2025 at 02:41 PM
+-- Generation Time: Mar 31, 2025 at 11:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -68,8 +68,22 @@ CREATE TABLE `assignment_submissions` (
   `file_path` varchar(255) DEFAULT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `grade` decimal(5,2) DEFAULT NULL,
-  `feedback` text DEFAULT NULL
+  `feedback` text DEFAULT NULL,
+  `external_link` varchar(255) DEFAULT NULL,
+  `submission_text` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `assignment_submissions`
+--
+
+INSERT INTO `assignment_submissions` (`submission_id`, `assignment_id`, `student_id`, `file_path`, `submitted_at`, `grade`, `feedback`, `external_link`, `submission_text`) VALUES
+(6, 1, 27, 'uploads\\1bd1f036-8636-4901-8fef-243645610187_Gultiano_IT321_Task4 (1).pdf', '2025-03-31 20:35:48', NULL, NULL, NULL, 'nonoe'),
+(7, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 20:36:28', NULL, NULL, NULL, 'waaa'),
+(8, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 20:40:55', NULL, NULL, NULL, 'walage'),
+(9, 1, 27, 'uploads\\d91520d6-0e1a-4c96-a43e-5531896e682d_Gultiano_IT321_Task4.pdf', '2025-03-31 20:49:11', NULL, NULL, NULL, 'waaa'),
+(10, 1, 27, 'uploads\\962173df-b801-44ab-935a-852565cb5f6c_cafe_preorderr.sql', '2025-03-31 20:50:46', NULL, NULL, NULL, 'eee'),
+(11, 1, 27, 'uploads\\10bb6747-7b3e-4eba-b684-a676e8810940_web2_demo1 (3).sql', '2025-03-31 20:57:18', NULL, NULL, NULL, 'adsadsa');
 
 -- --------------------------------------------------------
 
@@ -504,7 +518,7 @@ ALTER TABLE `assignments`
 -- AUTO_INCREMENT for table `assignment_submissions`
 --
 ALTER TABLE `assignment_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `courses`

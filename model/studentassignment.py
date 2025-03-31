@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, FastAPI
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, FastAPI, Form
 from pydantic import BaseModel
-from fastapi.staticfiles import StaticFiles  # Add this import
-from .db import get_db
-from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 import os
+import uuid  # To generate unique filenames
+from .db import get_db
 
 # Create the FastAPI app instance
 app = FastAPI()
 
 # Serve static files
 UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure upload directory exists
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-
 
 # Router for handling routes related to assignments
 router = APIRouter()
@@ -27,49 +28,60 @@ class StudentAssignment(BaseModel):
 class AssignmentSubmission(BaseModel):
     student_id: int
     assignment_id: int
-    file_path: str  # The file path can be relative or an external URL
+    file_path: str = None  # Store file path or external link
+    external_link: str = None  # Add external link field
     submission_text: str
 
-    def save(self, db_dep=Depends(get_db)):
-        db, conn = db_dep
 
-        # Check if file_path is a local file or an external URL
-        if self.file_path.startswith("http") or self.file_path.startswith("https"):
-            # It's an external URL (e.g., Google Form link)
-            file_path = self.file_path  # No change, just store the URL as is
-        else:
-            # Store file path relative to the 'uploads' directory
-            file_path = f"{UPLOAD_DIR}/{self.file_path}"
-
-        query = """
-            INSERT INTO assignment_submissions (student_id, assignment_id, file_path, submission_text)
-            VALUES (%s, %s, %s, %s)
-        """
-        db.execute(query, (self.student_id, self.assignment_id, file_path, self.submission_text))
-        conn.commit()
-
-
-# ✅ Assign an Assignment to a Course
-@router.post("/assignments/")
-async def create_assignment(assignment: StudentAssignment, db_dep=Depends(get_db)):
+@router.post("/submit-assignment/")
+async def submit_assignment(
+    student_id: int,
+    assignment_id: int,
+    file: UploadFile = File(None),            # Optional file upload
+    external_link: str = Form(None),          # Optional external link
+    submission_text: str = Form(...),         # Required submission text
+    db_dep=Depends(get_db)
+):
+    """Handle assignment submission."""
     db, conn = db_dep
 
-    # Check if course exists
-    db.execute("SELECT course_id FROM courses WHERE course_id = %s", (assignment.course_id,))
+    # ✅ Check if the assignment exists
+    db.execute("SELECT * FROM assignments WHERE assignment_id = %s", (assignment_id,))
     if not db.fetchone():
-        raise HTTPException(status_code=400, detail="Course not found")
-    
-    # Insert assignment
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    # ✅ Handle file upload or external link
+    file_path = None
+
+    # 1️⃣ If file is provided, save it to the upload directory with a unique filename
+    if file and file.filename:
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        try:
+            with open(file_path, "wb") as f:
+                f.write(await file.read())
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+    # 2️⃣ If external link is provided
+    elif external_link:
+        file_path = external_link
+
+    if not file_path:
+        raise HTTPException(status_code=400, detail="Either a file or an external link must be provided")
+
+    # ✅ Save the submission to the database
     query = """
-        INSERT INTO assignments (course_id, title, description, due_date)
+        INSERT INTO assignment_submissions (student_id, assignment_id, file_path, submission_text)
         VALUES (%s, %s, %s, %s)
-        RETURNING assignment_id
     """
-    db.execute(query, (assignment.course_id, assignment.title, assignment.description, assignment.due_date))
-    assignment_id = db.fetchone()["assignment_id"]
+    db.execute(query, (student_id, assignment_id, file_path or external_link, submission_text))
     conn.commit()
 
-    return {"message": "Assignment created successfully", "assignment_id": assignment_id}
+    return JSONResponse(
+        content={"message": "Submission successful", "file_path": file_path}, 
+        status_code=200
+    )
 
 @router.get("/student-assignment/{course_id}")
 async def get_course_assignments(course_id: int, db_dep=Depends(get_db)):
