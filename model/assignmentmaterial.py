@@ -142,12 +142,13 @@ async def get_assignment(assignment_id: int, db=Depends(get_db)):
     }
 
 # ✅ Download File (for uploaded files)
+
 @router.get("/assignments/download/{file_name}")
 async def download_file(file_name: str):
-    file_name = os.path.basename(file_name)  # To avoid directory traversal attacks
+    """Download a file from the uploads directory"""
+    file_name = os.path.basename(file_name)  # Prevent directory traversal
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
-    # Check if the file exists in the uploads directory
     if os.path.exists(file_path):
         return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
     

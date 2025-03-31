@@ -1,0 +1,101 @@
+Patient_ID,Patient_Name,Age,Gender,Blood_Pressure (mmHg),Heart_Rate (bpm),Cholesterol_Level (mg/dL),Diabetes,Symptoms,Diagnosis,Treatment,Hospital_Visit
+1,JOHN SMITH,,Female,120,70.0,200.0,No,headache,Hypertension,Rest & Hydration,No
+2,david Garcia,1.0,Male,,71.0,201.0,Yes, Fatigue, Cold, Lifestyle Changes,YES
+3,andrew harris,2.0,Female,,,202.0,Yes, Fatigue,, antibiotics,No
+4,emily miller,3.0,Female,123,,203.0,NO,,Diabetes,Rest & Hydration,YES
+5,abigail robinson,4.0,F,,,,, Fatigue,Hypertension,Rest & Hydration,
+6,Mia thomas,,Female,120 mmHg,75.0,205.0,NO,, Cold, Lifestyle Changes,Yes
+7,BENJAMIN HERNANDEZ,6.0,Male,,76.0,206.0,NO,headache,Flu, antibiotics, NO
+8,alice williams,7.0,,122 mmHg,,,,,Flu, Lifestyle Changes,Yes
+9,sophia Miller,8.0,Female,123,,208.0,YES, fever,, antibiotics,No
+10,JAMES DAVIS,9.0,,,,209.0,, Fatigue,Diabetes,,
+11,JAMES davis,,,,70.0,,Yes,headache,Flu, Lifestyle Changes,
+12,elijah anderson,11.0,Male,121 mmHg,71.0,211.0,NO, fever,Flu, antibiotics,YES
+13,WILLIAM GARCIA,,M,,72.0,,YES, Fatigue,, Lifestyle Changes,No
+14,chris DAVIS,13.0,Female,,,213.0,Yes,Cough ,,Rest & Hydration,No
+15,harper white,14.0,F,,,,Yes, fever,Hypertension,Rest & Hydration, NO
+16,MICHAEL BROWN,15.0,Male,120 mmHg,75.0,215.0,No,headache,,,Yes
+17,GRACE MARTIN,,M,121,76.0,,YES,headache,Hypertension,Rest & Hydration,No
+18,CHARLOTTE WILSON,17.0,F,122 mmHg,77.0,217.0,NO,, Cold, Lifestyle Changes,YES
+19,RYAN THOMPSON,18.0,F,123 mmHg,78.0,218.0,No, fever,Diabetes, antibiotics,YES
+20,lucas TAYLOR,,,124 mmHg,79.0,219.0,NO,Cough ,Flu,Rest & Hydration, NO
+21,james davis,20.0,Female,120,70.0,220.0,Yes,Cough ,Diabetes,Rest & Hydration,
+22,EMILY miller,,M,121 mmHg,71.0,221.0,,Cough ,Hypertension, antibiotics, NO
+23,victoria Martinez,,Female,122,72.0,222.0,Yes,headache,,,YES
+24,evelyn martin,,,123 mmHg,73.0,223.0,, Fatigue, Cold,Rest & Hydration,Yes
+25,john smith,,M,124,74.0,224.0,No,headache,Flu,,No
+26,Ella THOMAS,,F,120,,,No,headache, Cold, antibiotics,Yes
+27,liam johnson,,Female,,,,Yes,headache,Hypertension, antibiotics,
+28,noAh Brown,,,,77.0,227.0,YES, Fatigue,Diabetes, Lifestyle Changes,No
+29,AMELIA moore,,Male,123,,,Yes,,Hypertension,,YES
+30,JOSHUA JACKSON,29.0,F,,79.0,229.0,No, Fatigue, Cold, antibiotics,YES
+31,zoe Robinson,30.0,M,,70.0,230.0,, Fatigue,, antibiotics,
+32,ETHAN HARRIS,,F,121 mmHg,71.0,231.0,,Cough ,Diabetes, Lifestyle Changes,
+33,Olivia JONES,32.0,M,122 mmHg,72.0,232.0,YES,headache,Hypertension,,
+34,lucas taylor,33.0,F,123 mmHg,73.0,233.0,YES, Fatigue,Hypertension, antibiotics,
+35,ryan Thompson,34.0,F,,74.0,,No, Fatigue, Cold,,
+36,mason JACKSON,,Male,120,75.0,,, Fatigue,Diabetes,,
+37,mason jackson,36.0,Female,121,76.0,236.0,Yes, fever, Cold, Lifestyle Changes, NO
+38,ryan thompson,37.0,Female,,,237.0,Yes,, Cold, antibiotics,
+39,andrew harris,38.0,M,123 mmHg,78.0,238.0,,Cough ,Diabetes,Rest & Hydration,
+40,isabella martinez,,Female,,,239.0,No,headache, Cold, Lifestyle Changes,
+41,EVELYN MARTIN,,,,70.0,240.0,No,Cough ,Diabetes,Rest & Hydration,YES
+42,liam johnson,41.0,F,121 mmHg,71.0,241.0,NO,,Hypertension, Lifestyle Changes,YES
+43,elizabeth MOORE,42.0,,122 mmHg,,242.0,YES, Fatigue,Hypertension,Rest & Hydration,
+44,noah brown,,,123,73.0,,No,Cough ,, antibiotics,
+45,SOPHIA MILLER,44.0,Female,124,,,NO, Fatigue, Cold, Lifestyle Changes,Yes
+46,jacob taylor,45.0,Female,120 mmHg,75.0,245.0,,headache,Diabetes,,
+47,elizabeth moore,,F,121,76.0,,NO, fever,,,
+48,sophia miller,47.0,M,122,77.0,247.0,Yes, fever, Cold,Rest & Hydration,No
+49,emily miller,48.0,Female,123,,248.0,YES,headache,Flu,Rest & Hydration, NO
+50,Elijah ANDERSON,,,,,249.0,No, fever,Diabetes,, NO
+51,zoe robinson,50.0,Male,120 mmHg,70.0,200.0,YES,Cough ,Diabetes, antibiotics,No
+52,elijah anderson,,F,,71.0,201.0,,,Hypertension,,YES
+53,JOHN SMITH,,M,122,,202.0,,,Flu, Lifestyle Changes,Yes
+54,emma williams,,,123,73.0,203.0,No,Cough ,,,Yes
+55,alice WILLIAMS,,Female,124,,,,Cough ,Flu,Rest & Hydration, NO
+56,OLIVIA JONES,,M,120,75.0,205.0,, fever,Flu, antibiotics,
+57,alexander THOMPSON,56.0,,121,76.0,206.0,Yes,,Hypertension, antibiotics,Yes
+58,michael brown,,Female,,77.0,207.0,YES,,Hypertension,,
+59,ALEXANDER THOMPSON,,Female,123 mmHg,78.0,,Yes, Fatigue,, Lifestyle Changes,YES
+60,grace martin,59.0,,124,79.0,209.0,, fever,Flu,, NO
+61,DANIEL HERNANDEZ,60.0,Male,,70.0,210.0,Yes, fever,Diabetes,,
+62,james davis,61.0,Female,121 mmHg,71.0,211.0,YES,headache,Hypertension,,Yes
+63,emma williams,62.0,,122,,212.0,No,Cough ,, antibiotics,No
+64,ETHAN HARRIS,,M,123 mmHg,73.0,213.0,NO, Fatigue,,,Yes
+65,mia thomas,,M,124 mmHg,,214.0,NO,headache, Cold,, NO
+66,ryan thompson,65.0,Female,,,215.0,Yes, Fatigue, Cold,,
+67,sophia wilson,66.0,M,121,76.0,,No,Cough ,,,YES
+68,david garcia,67.0,,122 mmHg,,217.0,NO, Fatigue,Hypertension,Rest & Hydration,
+69,SAMANTHA WHITE,68.0,Male,123 mmHg,,218.0,NO,Cough ,Flu,,YES
+70,ALEXANDER THOMPSON,69.0,M,124 mmHg,,219.0,NO, fever,Hypertension,Rest & Hydration, NO
+71,ALEXANDER THOMPSON,70.0,Male,120,70.0,220.0,NO,headache,Flu, antibiotics,No
+72,BENJAMIN hernandez,71.0,,121,71.0,221.0,NO,headache,Hypertension,Rest & Hydration,
+73,emily miller,,Male,122,72.0,222.0,Yes,headache,Hypertension, Lifestyle Changes,
+74,sarah jones,,Female,123,73.0,223.0,No, fever, Cold, Lifestyle Changes,YES
+75,CHARLOTTE WILSON,74.0,Male,124 mmHg,74.0,,Yes, Fatigue,Hypertension,, NO
+76,abigail robinson,75.0,F,120,75.0,225.0,NO,,Flu, antibiotics,Yes
+77,AMELIA MOORE,,F,121,76.0,,, fever, Cold,,YES
+78,daniel hernandez,,Female,122 mmHg,77.0,227.0,No,headache,Hypertension,Rest & Hydration,YES
+79,ella thomas,78.0,F,123,78.0,228.0,No,headache, Cold, antibiotics,
+80,JACOB Taylor,,M,,79.0,229.0,NO, fever, Cold, Lifestyle Changes,
+81,DAVID GARCIA,80.0,F,,,230.0,YES,headache,,Rest & Hydration,YES
+82,AMELIA MOORE,81.0,M,121 mmHg,71.0,231.0,No, Fatigue,Flu,,No
+83,liAm johNson,82.0,M,,72.0,232.0,,Cough ,Flu, Lifestyle Changes,No
+84,mason jackson,83.0,Male,123,73.0,233.0,Yes,, Cold,,No
+85,benjamin hernandez,84.0,F,124 mmHg,,234.0,YES, Fatigue,Hypertension,,Yes
+86,Daniel HERNANDEZ,85.0,Male,120 mmHg,,,NO,,Diabetes, Lifestyle Changes,YES
+87,william garcia,86.0,Male,121 mmHg,76.0,236.0,Yes, Fatigue, Cold, antibiotics,No
+88,SOPHIA WILSON,,Female,122 mmHg,77.0,237.0,YES, fever,,, NO
+89,evelyn MARTIN,88.0,F,,,,NO, Fatigue,Hypertension, Lifestyle Changes,Yes
+90,chris davis,89.0,F,,79.0,,Yes,Cough ,Diabetes, antibiotics,Yes
+91,CHRIS DAVIS,90.0,,120 mmHg,70.0,,NO,headache,Flu, Lifestyle Changes,YES
+92,sarah jones,,Female,,71.0,,Yes,headache,,Rest & Hydration,No
+93,harper White,,,122,72.0,242.0,No, Fatigue,Flu,,YES
+94,grace Martin,93.0,,,,243.0,,headache,Flu, Lifestyle Changes, NO
+95,victoria martinez,,Female,124 mmHg,74.0,,,,,,No
+96,sarah jones,95.0,M,120 mmHg,,245.0,Yes,headache, Cold, antibiotics,No
+97,harper white,96.0,F,121,,246.0,Yes, Fatigue,Flu,,No
+98,matthew anderson,97.0,,122,,247.0,,headache,Diabetes,,YES
+99,jacob taylor,98.0,Female,123,78.0,248.0,NO,, Cold,Rest & Hydration,No
+100,michael Brown,99.0,M,124 mmHg,,,No, Fatigue,Hypertension, Lifestyle Changes,

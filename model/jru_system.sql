@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2025 at 11:09 PM
+-- Generation Time: Mar 31, 2025 at 09:20 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -83,7 +83,13 @@ INSERT INTO `assignment_submissions` (`submission_id`, `assignment_id`, `student
 (8, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 20:40:55', NULL, NULL, NULL, 'walage'),
 (9, 1, 27, 'uploads\\d91520d6-0e1a-4c96-a43e-5531896e682d_Gultiano_IT321_Task4.pdf', '2025-03-31 20:49:11', NULL, NULL, NULL, 'waaa'),
 (10, 1, 27, 'uploads\\962173df-b801-44ab-935a-852565cb5f6c_cafe_preorderr.sql', '2025-03-31 20:50:46', NULL, NULL, NULL, 'eee'),
-(11, 1, 27, 'uploads\\10bb6747-7b3e-4eba-b684-a676e8810940_web2_demo1 (3).sql', '2025-03-31 20:57:18', NULL, NULL, NULL, 'adsadsa');
+(11, 1, 27, 'uploads\\10bb6747-7b3e-4eba-b684-a676e8810940_web2_demo1 (3).sql', '2025-03-31 20:57:18', NULL, NULL, NULL, 'adsadsa'),
+(12, 1, 27, 'uploads\\83974acd-02ae-453b-9b4f-2b61d1e44fab_Patient-Data-List.csv', '2025-03-31 05:18:49', NULL, NULL, NULL, 'nonneee'),
+(13, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 05:34:36', NULL, NULL, NULL, 'asad'),
+(14, 28, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 06:37:46', NULL, NULL, NULL, 'ssa'),
+(15, 28, 27, 'uploads\\372b1afe-0793-44a6-9ac4-fc088c4682d5_inventory-summary-2025-03-11 (1).csv', '2025-03-31 06:37:53', NULL, NULL, NULL, 'asa'),
+(16, 28, 27, 'uploads\\85179ea3-a432-4091-a779-5a1ac6465a2b_Untitled design.jpg', '2025-03-31 07:10:09', NULL, NULL, NULL, 'kikmk'),
+(17, 1, 27, 'uploads\\d2c425af-81d6-44d9-b033-d5494ee94721_inventory-summary-2025-03-11 (1).csv', '2025-03-31 07:11:13', NULL, NULL, NULL, 'dw');
 
 -- --------------------------------------------------------
 
@@ -128,7 +134,8 @@ INSERT INTO `courses` (`course_id`, `course_name`, `section`, `user_id`, `class_
 (39, 'ddddddddddd', 'string', NULL, 'saa'),
 (40, 'NET121', 'BSIT', 23, 'WED'),
 (41, 'PROG1', 'BSIS', 23, 'THU'),
-(55, 'PROG2', 'BSIS', 23, 'SAT');
+(55, 'PROG2', 'BSIS', 23, 'SAT'),
+(56, 'SE', 'BSIT3A', 22, 'TUESDAY');
 
 -- --------------------------------------------------------
 
@@ -157,7 +164,8 @@ INSERT INTO `course_content` (`content_id`, `course_id`, `title`, `content`, `cr
 (11, 20, 'HAHHAHAHA', 'HUHUHUHUH', '2025-02-13 23:36:37', 'uploads\\jru_system.sql', NULL, 23),
 (12, 23, 'AAAAAAAAA', 'VVVVVVV', '2025-02-13 23:53:53', 'uploads\\(TEXAS) Week 5-Activity 2 - Sheet1.csv', NULL, 22),
 (13, 24, 'asas', 'asasa', '2025-02-24 11:52:20', 'uploads\\jru_system.sql', NULL, 22),
-(14, 36, 'mv jhgi', 'jkvuyfyu', '2025-02-24 11:52:50', 'uploads\\Gultiano_TLA2.docx', NULL, 22);
+(14, 36, 'mv jhgi', 'jkvuyfyu', '2025-02-24 11:52:50', 'uploads\\Gultiano_TLA2.docx', NULL, 22),
+(15, 56, 'GAA', 'FD', '2025-03-31 07:15:47', 'uploads\\inventory-summary-2025-03-11 (1).csv', NULL, 22);
 
 -- --------------------------------------------------------
 
@@ -206,7 +214,9 @@ INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`
 (3, 23, 'QWERTY', 'hujhfhjb', '2222-02-22 00:00:00', '2025-02-20 08:44:08', 20, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
 (4, 24, 'Prelim', 'jkbjhgskdjn', '2222-11-11 00:00:00', '2025-02-23 23:07:55', 30, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
 (5, 18, 'adfasda', 'dsasas', '1111-11-11 00:00:00', '2025-02-23 23:14:59', 11, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
-(6, 18, 'biuiouho', '\';pkm\';m', '2025-03-25 00:00:00', '2025-03-30 10:54:37', 30, 'https://forms.gle/FzBi16X5JbpMcdu77', 22, NULL);
+(6, 18, 'biuiouho', '\';pkm\';m', '2025-03-25 00:00:00', '2025-03-30 10:54:37', 30, 'https://forms.gle/FzBi16X5JbpMcdu77', 22, NULL),
+(7, 25, ' cscS', 'CZCSD', '2025-03-04 00:00:00', '2025-03-31 07:01:32', 12, '/uploads/inventory-summary-2025-03-11.csv', 22, NULL),
+(8, 25, 'XCASFQW', 'DSD', '2025-04-24 00:00:00', '2025-03-31 07:02:07', 21, 'https://github.com/orent143/BeataIMS/blob/updated/IMS/src/views/ims/Stock.vue', 22, NULL);
 
 -- --------------------------------------------------------
 
@@ -357,7 +367,10 @@ INSERT INTO `student_courses` (`enrollment_id`, `student_id`, `course_id`, `enro
 (12, 29, 19, '2025-02-14 04:24:50'),
 (13, 27, 19, '2025-02-14 04:24:55'),
 (14, 27, 24, '2025-02-24 11:52:07'),
-(15, 27, 36, '2025-02-24 11:52:34');
+(15, 27, 36, '2025-02-24 11:52:34'),
+(16, 27, 23, '2025-03-31 07:00:24'),
+(17, 27, 25, '2025-03-31 07:00:34'),
+(18, 27, 56, '2025-03-31 07:15:52');
 
 -- --------------------------------------------------------
 
@@ -518,19 +531,19 @@ ALTER TABLE `assignments`
 -- AUTO_INCREMENT for table `assignment_submissions`
 --
 ALTER TABLE `assignment_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `course_content`
 --
 ALTER TABLE `course_content`
-  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `course_materials`
@@ -542,7 +555,7 @@ ALTER TABLE `course_materials`
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `exam_submissions`
@@ -584,7 +597,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `users`

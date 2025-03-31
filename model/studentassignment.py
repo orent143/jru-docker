@@ -3,21 +3,17 @@ from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 import os
-import uuid  # To generate unique filenames
+import uuid  
 from .db import get_db
 
-# Create the FastAPI app instance
 app = FastAPI()
 
-# Serve static files
 UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure upload directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)  
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
-# Router for handling routes related to assignments
 router = APIRouter()
 
-# Define schemas (models)
 class StudentAssignment(BaseModel):
     student_id: int
     course_id: int
@@ -28,32 +24,23 @@ class StudentAssignment(BaseModel):
 class AssignmentSubmission(BaseModel):
     student_id: int
     assignment_id: int
-    file_path: str = None  # Store file path or external link
-    external_link: str = None  # Add external link field
+    file_path: str = None  
+    external_link: str = None  
     submission_text: str
-
-
 @router.post("/submit-assignment/")
 async def submit_assignment(
-    student_id: int,
-    assignment_id: int,
-    file: UploadFile = File(None),            # Optional file upload
-    external_link: str = Form(None),          # Optional external link
-    submission_text: str = Form(...),         # Required submission text
-    db_dep=Depends(get_db)
+    student_id: int = Form(...),          # Expecting Form data for student_id
+    assignment_id: int = Form(...),       # Expecting Form data for assignment_id
+    file: UploadFile = File(None),        # File data, sent as multipart form data
+    external_link: str = Form(None),      # External link, sent as Form data
+    submission_text: str = Form(...),     # Submission text, sent as Form data
+    db_dep=Depends(get_db)               # Inject the db dependency here
 ):
     """Handle assignment submission."""
     db, conn = db_dep
-
-    # ✅ Check if the assignment exists
-    db.execute("SELECT * FROM assignments WHERE assignment_id = %s", (assignment_id,))
-    if not db.fetchone():
-        raise HTTPException(status_code=404, detail="Assignment not found")
-
-    # ✅ Handle file upload or external link
     file_path = None
 
-    # 1️⃣ If file is provided, save it to the upload directory with a unique filename
+    # Process file upload if provided
     if file and file.filename:
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
@@ -63,25 +50,31 @@ async def submit_assignment(
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-    # 2️⃣ If external link is provided
+    # If external link provided, use it
     elif external_link:
         file_path = external_link
 
+    # Ensure either file or external link is provided
     if not file_path:
         raise HTTPException(status_code=400, detail="Either a file or an external link must be provided")
 
-    # ✅ Save the submission to the database
+    # Insert into the database
     query = """
         INSERT INTO assignment_submissions (student_id, assignment_id, file_path, submission_text)
         VALUES (%s, %s, %s, %s)
     """
-    db.execute(query, (student_id, assignment_id, file_path or external_link, submission_text))
-    conn.commit()
+    try:
+        db.execute(query, (student_id, assignment_id, file_path, submission_text))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     return JSONResponse(
         content={"message": "Submission successful", "file_path": file_path}, 
         status_code=200
     )
+
 
 @router.get("/student-assignment/{course_id}")
 async def get_course_assignments(course_id: int, db_dep=Depends(get_db)):
@@ -109,18 +102,15 @@ async def get_course_assignments(course_id: int, db_dep=Depends(get_db)):
 async def get_student_assignments(student_id: int, course_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if student is enrolled in the course
     db.execute("SELECT * FROM student_courses WHERE student_id = %s AND course_id = %s", (student_id, course_id))
     if not db.fetchone():
         raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
 
-    # Get the course name
     db.execute("SELECT course_name FROM courses WHERE course_id = %s", (course_id,))
     course = db.fetchone()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # Get assignments for the course
     query = """
         SELECT assignment_id, title, description, due_date, file_path, external_link
         FROM assignments
@@ -129,7 +119,6 @@ async def get_student_assignments(student_id: int, course_id: int, db_dep=Depend
     db.execute(query, (course_id,))
     assignments = db.fetchall()
 
-    # Separate the file_path and external_link in the response
     result = []
     for assignment in assignments:
         result.append({
@@ -172,11 +161,9 @@ async def get_submitted_assignments(assignment_id: int, db_dep=Depends(get_db)):
 
 @router.get("/assignment_submissions/download/{file_name}")
 async def download_submission_file(file_name: str):
-    # Sanitize file name to avoid directory traversal attacks
-    file_name = os.path.basename(file_name)  # Prevent directory traversal
+    file_name = os.path.basename(file_name)  
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
-    # Check if the file exists in the uploads directory
     if os.path.exists(file_path):
         return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
     
@@ -184,11 +171,9 @@ async def download_submission_file(file_name: str):
 
 @router.get("/assignments/download/{file_name}")
 async def download_file(file_name: str):
-    # Sanitize the file name to prevent directory traversal attacks
-    file_name = os.path.basename(file_name)  # Only keep the base file name
+    file_name = os.path.basename(file_name)  
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
-    # Check if the file exists
     if os.path.exists(file_path):
         return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
     
