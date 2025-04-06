@@ -1,13 +1,14 @@
 from fastapi import Depends, HTTPException, APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from .db import get_db
 from sqlalchemy.orm import Session
+from .utils import get_current_user, pwd_context  # Importing pwd_context for hashing passwords
+from enum import Enum
 
 router = APIRouter()
 
 # Pydantic Models
-from enum import Enum
 class UserRole(str, Enum):
     student = "student"
     faculty = "faculty"
@@ -15,15 +16,15 @@ class UserRole(str, Enum):
 
 class UserCreate(BaseModel):
     name: str
-    email: str
+    email: EmailStr  # Ensures email format validation
     password: str 
-    role: UserRole    
+    role: UserRole  
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
-    role: Optional[str] = None
+    role: Optional[UserRole] = None  # Use UserRole instead of str for role
 
 class UserResponse(BaseModel):
     user_id: int
@@ -31,6 +32,17 @@ class UserResponse(BaseModel):
     email: str
     role: str
     created_at: str
+
+class PasswordUpdate(BaseModel):
+    user_id: int
+    new_password: str
+
+@router.get("/protected")
+async def protected_route(current_user: dict = Depends(get_current_user)):
+    """
+    This is a protected route. Only accessible with a valid JWT token.
+    """
+    return {"message": f"Hello, {current_user['sub']}"}
 
 # 🚀 Get all users (READ)
 @router.get("/users/", response_model=List[UserResponse])
@@ -81,17 +93,20 @@ async def create_user(user: UserCreate, db_dep=Depends(get_db)):
     db.execute("SELECT user_id FROM users WHERE email = %s", (user.email,))
     if db.fetchone():
         raise HTTPException(status_code=400, detail="Email is already registered.")
+    
+    # Hash the password
+    hashed_password = pwd_context.hash(user.password)
 
     # Insert User
     query = "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)"
-    values = (user.name, user.email, user.password, user.role.value)
+    values = (user.name, user.email, hashed_password, user.role.value)
 
     try:
         db.execute(query, values)
         conn.commit()
         user_id = db.lastrowid  
 
-        # ✅ Auto-add students to students table
+        # Auto-add students to students table
         if user.role == UserRole.student:
             first_name, last_name = user.name.split()[0], user.name.split()[-1] if " " in user.name else ""
             db.execute("INSERT INTO students (user_id, student_number, first_name, last_name) VALUES (%s, %s, %s, %s)", 
@@ -108,6 +123,7 @@ async def create_user(user: UserCreate, db_dep=Depends(get_db)):
         "role": user.role.value,
         "created_at": "Just now"
     }
+
 
 # 🚀 Update a user (UPDATE)
 @router.put("/users/{user_id}")
@@ -134,7 +150,7 @@ async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_
         conn.commit()
 
         # If role is changed to student, ensure they exist in students table
-        if "role" in update_data and update_data["role"] == "student":
+        if "role" in update_data and update_data["role"] == UserRole.student:
             first_name, last_name = update_data.get("name", "").split()[0], update_data.get("name", "").split()[-1] if " " in update_data.get("name", "") else ""
             db.execute("INSERT IGNORE INTO students (user_id, student_number, first_name, last_name) VALUES (%s, %s, %s, %s)", 
                        (user_id, f"SN{user_id:06d}", first_name, last_name))
@@ -165,3 +181,25 @@ async def delete_user(user_id: int, db_dep=Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     return {"message": "User deleted successfully"}
+
+@router.post("/update-password/")
+async def update_password(password_update: PasswordUpdate, db_dep=Depends(get_db)):
+    db, conn = db_dep
+    
+    # Check if user exists
+    db.execute("SELECT user_id FROM users WHERE user_id = %s", (password_update.user_id,))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Hash the new password
+    hashed_password = pwd_context.hash(password_update.new_password)
+    
+    try:
+        # Update the password
+        query = "UPDATE users SET password = %s WHERE user_id = %s"
+        db.execute(query, (hashed_password, password_update.user_id))
+        conn.commit()
+        return {"message": "Password updated successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating password: {str(e)}")

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2025 at 09:20 AM
+-- Generation Time: Apr 06, 2025 at 03:57 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -44,16 +44,7 @@ CREATE TABLE `assignments` (
 --
 
 INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`, `external_link`) VALUES
-(1, 18, 'sdsd', 'sdsd', '0000-00-00 00:00:00', 'uploads\\iamot_09_final.doc', 22, '2025-02-14 12:48:52', NULL),
-(25, 18, 'asda', 'gui', '2025-11-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:01:28', NULL),
-(26, 23, 'qasas', 'asas', '2222-02-22 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:43:45', NULL),
-(27, 29, 'ads2', '3qeq', '1111-11-11 00:00:00', 'uploads\\Gultiano_IT321_Task4.pdf', 22, '2025-02-20 08:56:23', NULL),
-(28, 18, '12222', 'asa121', '1111-11-11 00:00:00', 'uploads\\Untitled design.jpg', 22, '2025-02-24 00:46:48', NULL),
-(29, 24, 'sakbiufiuop[k', 'jkuhgioihpo', '1111-11-11 00:00:00', 'uploads\\jru_system (2).sql', 22, '2025-02-24 08:37:57', NULL),
-(30, 36, 'aiugibi', 'honmoinoin', '1111-11-11 00:00:00', 'uploads\\Gultiano_TLA2.docx', 22, '2025-02-24 12:39:58', NULL),
-(31, 18, 'qwqw1', '111', '2025-03-31 00:00:00', 'https://forms.gle/FzBi16X5JbpMcdu77', 22, '2025-03-30 11:32:37', NULL),
-(32, 18, 'AHAHAHAHH', 'AHAHAHAH', '2025-03-31 00:00:00', '/uploads/inventory-summary-2025-03-11.csv', 22, '2025-03-31 02:34:50', NULL),
-(33, 18, 'HUIHUHUHUHU', 'HUHUHUHU', '2025-03-20 00:00:00', 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', 22, '2025-03-31 02:35:07', NULL);
+(34, 73, 'Understanding the Deming Cycle & Test Script Creation', 'Please read the instructions carefully. After completing this, kindly submit it in editable document format and follow the filename structure: LASTNAME_Finals-TLA5_03282025\r\nResearch and define the in your own understanding and provide an example of how the PDCA cycle applies to Software Testing.\r\nResearch what elements must be included when writing a in software testing and identify and list the of a structured test script.\r\nProvide the source where you have gotten the information and include the date it was published. Once you have completed your research, using the information you have gathered, create test scripts based on the following scenarios:\r\nA banking application allows users to log in with a username and password. The system should lock the account after three failed attempts. Write a test script to validate this functionality.\r\nAn e-commerce website allows customers to add items to their cart and proceed to checkout. The system should display a confirmation message when an order is successfully placed. Write a test script to validate this functionality.', '2025-04-04 00:00:00', NULL, 41, '2025-04-04 09:48:31', NULL);
 
 -- --------------------------------------------------------
 
@@ -78,18 +69,8 @@ CREATE TABLE `assignment_submissions` (
 --
 
 INSERT INTO `assignment_submissions` (`submission_id`, `assignment_id`, `student_id`, `file_path`, `submitted_at`, `grade`, `feedback`, `external_link`, `submission_text`) VALUES
-(6, 1, 27, 'uploads\\1bd1f036-8636-4901-8fef-243645610187_Gultiano_IT321_Task4 (1).pdf', '2025-03-31 20:35:48', NULL, NULL, NULL, 'nonoe'),
-(7, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 20:36:28', NULL, NULL, NULL, 'waaa'),
-(8, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 20:40:55', NULL, NULL, NULL, 'walage'),
-(9, 1, 27, 'uploads\\d91520d6-0e1a-4c96-a43e-5531896e682d_Gultiano_IT321_Task4.pdf', '2025-03-31 20:49:11', NULL, NULL, NULL, 'waaa'),
-(10, 1, 27, 'uploads\\962173df-b801-44ab-935a-852565cb5f6c_cafe_preorderr.sql', '2025-03-31 20:50:46', NULL, NULL, NULL, 'eee'),
-(11, 1, 27, 'uploads\\10bb6747-7b3e-4eba-b684-a676e8810940_web2_demo1 (3).sql', '2025-03-31 20:57:18', NULL, NULL, NULL, 'adsadsa'),
-(12, 1, 27, 'uploads\\83974acd-02ae-453b-9b4f-2b61d1e44fab_Patient-Data-List.csv', '2025-03-31 05:18:49', NULL, NULL, NULL, 'nonneee'),
-(13, 1, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 05:34:36', NULL, NULL, NULL, 'asad'),
-(14, 28, 27, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform', '2025-03-31 06:37:46', NULL, NULL, NULL, 'ssa'),
-(15, 28, 27, 'uploads\\372b1afe-0793-44a6-9ac4-fc088c4682d5_inventory-summary-2025-03-11 (1).csv', '2025-03-31 06:37:53', NULL, NULL, NULL, 'asa'),
-(16, 28, 27, 'uploads\\85179ea3-a432-4091-a779-5a1ac6465a2b_Untitled design.jpg', '2025-03-31 07:10:09', NULL, NULL, NULL, 'kikmk'),
-(17, 1, 27, 'uploads\\d2c425af-81d6-44d9-b033-d5494ee94721_inventory-summary-2025-03-11 (1).csv', '2025-03-31 07:11:13', NULL, NULL, NULL, 'dw');
+(18, 34, 43, 'uploads\\1e429fe9-a0d7-4165-8292-35dd445f7160_Pre-departure-Orientation.pdf', '2025-04-06 03:40:09', NULL, NULL, NULL, 'guhh'),
+(19, 34, 43, 'uploads\\cdb09737-22d1-4cc1-a03f-a7744ac00fbb_code.png', '2025-04-06 03:43:02', NULL, NULL, NULL, 'TEST');
 
 -- --------------------------------------------------------
 
@@ -110,32 +91,45 @@ CREATE TABLE `courses` (
 --
 
 INSERT INTO `courses` (`course_id`, `course_name`, `section`, `user_id`, `class_schedule`) VALUES
-(18, 'ITELECT3', 'BSCS-3l', 22, 'MON: 1:00pm to 4:00pm'),
-(19, 'ITELECT4', 'BSCS-3D', 23, 'MON'),
-(20, 'ITELECT4', 'BSCS-3D', 23, 'MON'),
-(21, 'SAS', 'SA', 23, 'string'),
-(22, 'SAS', 'SA', 23, 'string'),
-(23, 'asas', 'asas', 22, 'asa'),
-(24, 'asas', 'asas', 22, 'MON'),
-(25, 'asas', 'asas', 22, 'MON'),
-(26, '212', 'string', 22, 'string'),
-(27, '212', 'string', 22, 'string'),
-(28, '212', 'string', 22, 'string'),
-(29, 'qwerty', 'IT', 22, 'MON'),
-(30, 'ITERA', 'CMBS', 23, 'FRI'),
-(31, 'ITERA', 'CMBS', 23, 'FRI'),
-(32, 'sssss', 'ssss', 22, 'sat'),
-(33, 'sssss', 'ssss', 22, 'sat'),
-(34, 'string', 'string', 22, 'string'),
-(35, 'string', 'string', 22, 'string'),
-(36, 'Sample Course', 'A', 22, 'MWF 10-11am'),
-(37, 'hieee', 'string', 22, 'string'),
+(18, 'ITELECT3', 'BSCS-3l', NULL, 'MON: 1:00pm to 4:00pm'),
+(19, 'ITELECT4', 'BSCS-3D', NULL, 'MON'),
+(20, 'ITELECT4', 'BSCS-3D', NULL, 'MON'),
+(21, 'SAS', 'SA', NULL, 'string'),
+(22, 'SAS', 'SA', NULL, 'string'),
+(23, 'asas', 'asas', NULL, 'asa'),
+(24, 'asas', 'asas', NULL, 'MON'),
+(25, 'asas', 'asas', NULL, 'MON'),
+(26, '212', 'string', NULL, 'string'),
+(27, '212', 'string', NULL, 'string'),
+(28, '212', 'string', NULL, 'string'),
+(29, 'qwerty', 'IT', NULL, 'MON'),
+(30, 'ITERA', 'CMBS', NULL, 'FRI'),
+(31, 'ITERA', 'CMBS', NULL, 'FRI'),
+(32, 'sssss', 'ssss', NULL, 'sat'),
+(33, 'sssss', 'ssss', NULL, 'sat'),
+(34, 'string', 'string', NULL, 'string'),
+(35, 'string', 'string', NULL, 'string'),
+(36, 'Sample Course', 'A', NULL, 'MWF 10-11am'),
+(37, 'hieee', 'string', NULL, 'string'),
 (38, 'hieee', 'string', NULL, 'string'),
 (39, 'ddddddddddd', 'string', NULL, 'saa'),
-(40, 'NET121', 'BSIT', 23, 'WED'),
-(41, 'PROG1', 'BSIS', 23, 'THU'),
-(55, 'PROG2', 'BSIS', 23, 'SAT'),
-(56, 'SE', 'BSIT3A', 22, 'TUESDAY');
+(40, 'NET121', 'BSIT', NULL, 'WED'),
+(41, 'PROG1', 'BSIS', NULL, 'THU'),
+(55, 'PROG2', 'BSIS', NULL, 'SAT'),
+(56, 'SE', 'BSIT3A', NULL, 'TUESDAY'),
+(58, 'ELEC014', 'BSIT-3A', NULL, 'MON-THU'),
+(68, 'ELEC014', 'BSIT-3B', NULL, 'TUE-FRI'),
+(69, 'ELEC014', 'BSCS-3A', NULL, 'MON-WED'),
+(70, 'GEC010', 'BSPH-2A', NULL, 'TUE'),
+(71, 'GEC010', 'BSN-3B', NULL, 'TUE'),
+(72, 'GEC010', 'BSN-3C', NULL, 'WED'),
+(73, 'ELEC014', 'BSIT-3A', 41, 'FRI'),
+(74, 'ELEC014', 'BSIT-3B', 41, 'THU'),
+(75, 'ELEC014', 'BSCS-3A', 41, 'MON'),
+(76, 'GEC010', 'BSPH-2A', 41, 'TUE'),
+(77, 'GEC010', 'BSN-1A', 41, 'MON'),
+(79, 'GEC010', 'BSN-1B', 41, 'TUE'),
+(80, 'GEC01-', 'BSTM-2A', 41, 'MON');
 
 -- --------------------------------------------------------
 
@@ -165,7 +159,14 @@ INSERT INTO `course_content` (`content_id`, `course_id`, `title`, `content`, `cr
 (12, 23, 'AAAAAAAAA', 'VVVVVVV', '2025-02-13 23:53:53', 'uploads\\(TEXAS) Week 5-Activity 2 - Sheet1.csv', NULL, 22),
 (13, 24, 'asas', 'asasa', '2025-02-24 11:52:20', 'uploads\\jru_system.sql', NULL, 22),
 (14, 36, 'mv jhgi', 'jkvuyfyu', '2025-02-24 11:52:50', 'uploads\\Gultiano_TLA2.docx', NULL, 22),
-(15, 56, 'GAA', 'FD', '2025-03-31 07:15:47', 'uploads\\inventory-summary-2025-03-11 (1).csv', NULL, 22);
+(15, 56, 'GAA', 'FD', '2025-03-31 07:15:47', 'uploads\\inventory-summary-2025-03-11 (1).csv', NULL, 22),
+(16, 73, 'Pre-Survey form for the Cebu Tour', 'Good day @everyone and Happy New Year! For those who are enrolled in ELEC014 - Seminars, Workshops, please accomplish this pre-survey form for the Cebu Tour:\r\n', '2025-04-04 09:06:49', 'uploads\\Gultiano_TLA4.pdf', NULL, 41),
+(17, 73, 'Seminar Session', 'Good evening @everyone, for seminars, tours, and workshops this week, our session will be on January 11, 2025 (Saturday) with an invited speaker, that means no meeting will be conducted based on your class schedules.', '2025-04-04 09:15:15', NULL, NULL, 41),
+(18, 73, 'Parents Orientation', 'Good day @everyone! For Seminars, Tours, and Workshops, please be informed that there will be a parent\'s orientation on January 18, 2025 (Saturday) 10AM - 12 NN @ L205 to discuss the proposed itenerary for the Cebu Tour and other important details related to it. This orientation will be conducted in hybrid setup. Thank you!', '2025-04-04 09:18:17', NULL, NULL, 41),
+(19, 73, 'Seminar Session', 'Good day @everyone, due to a conflict of schedules in labs, please be informed that we will have our seminar session tomorrow @ 9am - 12nn via Google Meet. I will send the meet link later. Thank you!\r\n', '2025-04-04 09:18:46', NULL, NULL, 41),
+(20, 73, 'Seminar Session', 'Good day everyone!\r\nDue to unforeseen changes, we will have our seminar session tomorrow @ 1PM - 5 PM via Google Meet:', '2025-04-04 09:19:30', NULL, NULL, 41),
+(21, 73, 'Local Industry Tour', 'Good evening, everyone!\r\n\r\nIMPORTANT ANNOUNCEMENT‼️\r\n\r\nDue to the limited seating capacity of the bus for our local industry tour, the visit to the Mindanao Media Hub will be conducted in two batches:\r\n\r\nFebruary 20, 2025: BSIT 3A and CS 3 will participate in the tour.\r\nBSIT 3B: Your schedule will be announced as soon as possible.\r\n\r\n\r\nAdditionally, all students are required to secure their ₱50.00 payment tomorrow (9:00 AM - 10:30 AM) at L201.\r\n\r\nPlease stay tuned for further updates. Thank you for your cooperation and understanding!', '2025-04-04 09:21:34', NULL, NULL, 41),
+(22, 73, 'Pre-Departure content', 'Good day everyone, sending you the copy of the pre-departure orientation content', '2025-04-04 09:24:15', 'uploads\\Pre-departure-Orientation.pdf', NULL, 41);
 
 -- --------------------------------------------------------
 
@@ -216,7 +217,8 @@ INSERT INTO `exams` (`exam_id`, `course_id`, `title`, `description`, `exam_date`
 (5, 18, 'adfasda', 'dsasas', '1111-11-11 00:00:00', '2025-02-23 23:14:59', 11, 'uploads\\Gultiano_IT3A_Task2.docx', 22, NULL),
 (6, 18, 'biuiouho', '\';pkm\';m', '2025-03-25 00:00:00', '2025-03-30 10:54:37', 30, 'https://forms.gle/FzBi16X5JbpMcdu77', 22, NULL),
 (7, 25, ' cscS', 'CZCSD', '2025-03-04 00:00:00', '2025-03-31 07:01:32', 12, '/uploads/inventory-summary-2025-03-11.csv', 22, NULL),
-(8, 25, 'XCASFQW', 'DSD', '2025-04-24 00:00:00', '2025-03-31 07:02:07', 21, 'https://github.com/orent143/BeataIMS/blob/updated/IMS/src/views/ims/Stock.vue', 22, NULL);
+(8, 25, 'XCASFQW', 'DSD', '2025-04-24 00:00:00', '2025-03-31 07:02:07', 21, 'https://github.com/orent143/BeataIMS/blob/updated/IMS/src/views/ims/Stock.vue', 22, NULL),
+(9, 73, 'Prelim Exam', 'Please read the following instructions carefully before beginning the assessment:\r\nRead each question carefully before providing your answer. Pay attention to any instructions or details provided in the question.\r\nThis assessment is to be completed individually. Collaboration with other individuals or consulting unauthorized materials is strictly prohibited.', '2025-04-04 00:00:00', '2025-04-04 09:47:36', 60, 'https://docs.google.com/forms/d/e/1FAIpQLSfar0bqNJfbp06w14avZ4dzxjgAPXyGMaC79mXGIz9LgtODqA/alreadyresponded?hr_submission=ChkIn6OTsdQPEhAIhZePwYgUEgcI8_DEwYIVEAE', 41, NULL);
 
 -- --------------------------------------------------------
 
@@ -266,15 +268,6 @@ CREATE TABLE `instructors` (
   `department` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `instructors`
---
-
-INSERT INTO `instructors` (`instructor_id`, `user_id`, `name`, `hire_date`, `department`) VALUES
-(7, 21, 'faculty', '2025-02-11', 'Unknown Department'),
-(8, 22, 'geric', '2025-02-11', 'Unknown Department'),
-(9, 23, 'gi', '2025-02-12', 'Unknown Department');
-
 -- --------------------------------------------------------
 
 --
@@ -302,7 +295,8 @@ INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_
 (3, 22, 'klhghlkj', 'kjhklhjlkj', '2025-02-23 10:21:33', '1111-11-11', 22, 23, NULL),
 (4, 37, 'asasa', 'sasa', '2025-02-24 00:43:21', '1111-11-11', 11, 22, NULL),
 (9, 18, 'string', 'string', '2025-03-30 09:33:32', '0000-00-00', 10, 22, 'https://forms.gle/fakWLQQgTLqboFrh8'),
-(10, 18, 'AHAHAHAHAH', 'LM, KLJBOIN', '2025-03-31 06:11:42', '0000-00-00', 20, 22, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform');
+(10, 18, 'AHAHAHAHAH', 'LM, KLJBOIN', '2025-03-31 06:11:42', '0000-00-00', 20, 22, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform'),
+(11, 73, 'Quiz 1', 'Answer the quiz(dont use chatbots)', '2025-04-04 09:45:31', '2025-04-04', 10, 41, 'https://docs.google.com/forms/d/e/1FAIpQLSd_98cdtOpa13dy_fQK5hCPxyD2DvGfDeIxxuWehBkE5LlZdg/alreadyresponded?hr_submission=ChkIn6OTsdQPEhAI1-XKmfMVEgcI8_DEwYIVEAE');
 
 -- --------------------------------------------------------
 
@@ -340,9 +334,10 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `last_name`, `enrollment_date`) VALUES
-(1, 24, '', 'mykkkk', '', '2025-02-13'),
-(5, 29, 'SN000029', 'asd', '', '2025-02-13'),
-(6, 30, 'SN000030', 'John', 'Doe', '2025-02-13');
+(7, 34, 'SN000034', 'Asi', '', '2025-04-01'),
+(8, 35, 'SN000035', 'Kobe', '', '2025-04-01'),
+(9, 36, 'SN000036', 'Tine', '', '2025-04-01'),
+(12, 43, 'SN000043', 'Geric', 'Gultiano', '2025-04-03');
 
 -- --------------------------------------------------------
 
@@ -362,15 +357,7 @@ CREATE TABLE `student_courses` (
 --
 
 INSERT INTO `student_courses` (`enrollment_id`, `student_id`, `course_id`, `enrolled_at`) VALUES
-(10, 24, 18, '2025-02-14 04:06:52'),
-(11, 27, 18, '2025-02-14 04:06:56'),
-(12, 29, 19, '2025-02-14 04:24:50'),
-(13, 27, 19, '2025-02-14 04:24:55'),
-(14, 27, 24, '2025-02-24 11:52:07'),
-(15, 27, 36, '2025-02-24 11:52:34'),
-(16, 27, 23, '2025-03-31 07:00:24'),
-(17, 27, 25, '2025-03-31 07:00:34'),
-(18, 27, 56, '2025-03-31 07:15:52');
+(22, 43, 73, '2025-04-04 08:57:49');
 
 -- --------------------------------------------------------
 
@@ -393,14 +380,12 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
 (9, 'admin', 'admin@admin', 'string', 'admin', '2025-02-11 19:20:17'),
-(21, 'faculty', 'faculty@123', 'faculty', 'faculty', '2025-02-12 10:30:40'),
-(22, 'geric', 'geric@2', 'heric', 'faculty', '2025-02-12 11:14:03'),
-(23, 'gi', 'gi@1', 'gi', 'faculty', '2025-02-13 06:35:57'),
-(24, 'mykkkk', 'student@1', 'myk', 'student', '2025-02-14 01:31:34'),
-(27, 'gelo', 'gelo@3', 'gelo', 'student', '2025-02-14 03:32:23'),
-(28, 'coy', 'coy@4', 'coy', 'student', '2025-02-14 03:38:40'),
-(29, 'asd', 'asd@asd', '12', 'student', '2025-02-14 03:43:33'),
-(30, 'John Doe', 'john.doe@example.com', 'aa', 'student', '2025-02-14 03:44:11');
+(34, 'Asi', 'ivaldez_220000000293@uic.edu.ph', 'ASI', 'student', '2025-04-02 05:19:18'),
+(35, 'Kobe', 'kcorpuz_220000002183@uic.edu.ph', 'kobe', 'student', '2025-04-02 05:20:46'),
+(36, 'Tine', 'justineslozada@gmail.com', 'JUSTINE', 'student', '2025-04-02 05:23:53'),
+(40, 'Admin', 'orentgultiano11@gmail.com', '$2b$12$ldWtvfFWUHI46kxGYCJBq.e/AY2rCaOJ2RRRdHW95zwl9aiFcVEKq', 'admin', '2025-04-03 11:46:34'),
+(41, 'Sir Geric', 'wlage35@gmail.com', '$2b$12$SGCrupcTfBGfLBjzYP1e5ubVpZNlPibPR0UIcCc4DKNVLAWWfVcsG', 'faculty', '2025-04-04 08:25:13'),
+(43, 'Geric Gultiano', 'ggultiano_220000000886@uic.edu.ph', '$2b$12$mYBWVj2H1Zz2SJZ6fvRYs.rMEkojdurD1F6Vl3x2fXSblRdNhtIJ.', 'student', '2025-04-04 08:31:48');
 
 --
 -- Indexes for dumped tables
@@ -525,25 +510,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `assignment_submissions`
 --
 ALTER TABLE `assignment_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT for table `course_content`
 --
 ALTER TABLE `course_content`
-  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `content_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `course_materials`
@@ -555,7 +540,7 @@ ALTER TABLE `course_materials`
 -- AUTO_INCREMENT for table `exams`
 --
 ALTER TABLE `exams`
-  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `exam_submissions`
@@ -579,7 +564,7 @@ ALTER TABLE `instructors`
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `quiz_submissions`
@@ -591,19 +576,19 @@ ALTER TABLE `quiz_submissions`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- Constraints for dumped tables
