@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2025 at 03:57 PM
+-- Generation Time: Apr 09, 2025 at 01:22 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -44,7 +44,8 @@ CREATE TABLE `assignments` (
 --
 
 INSERT INTO `assignments` (`assignment_id`, `course_id`, `title`, `description`, `due_date`, `file_path`, `user_id`, `created_at`, `external_link`) VALUES
-(34, 73, 'Understanding the Deming Cycle & Test Script Creation', 'Please read the instructions carefully. After completing this, kindly submit it in editable document format and follow the filename structure: LASTNAME_Finals-TLA5_03282025\r\nResearch and define the in your own understanding and provide an example of how the PDCA cycle applies to Software Testing.\r\nResearch what elements must be included when writing a in software testing and identify and list the of a structured test script.\r\nProvide the source where you have gotten the information and include the date it was published. Once you have completed your research, using the information you have gathered, create test scripts based on the following scenarios:\r\nA banking application allows users to log in with a username and password. The system should lock the account after three failed attempts. Write a test script to validate this functionality.\r\nAn e-commerce website allows customers to add items to their cart and proceed to checkout. The system should display a confirmation message when an order is successfully placed. Write a test script to validate this functionality.', '2025-04-04 00:00:00', NULL, 41, '2025-04-04 09:48:31', NULL);
+(34, 73, 'Understanding the Deming Cycle & Test Script Creation', 'Please read the instructions carefully. After completing this, kindly submit it in editable document format and follow the filename structure: LASTNAME_Finals-TLA5_03282025\r\nResearch and define the in your own understanding and provide an example of how the PDCA cycle applies to Software Testing.\r\nResearch what elements must be included when writing a in software testing and identify and list the of a structured test script.\r\nProvide the source where you have gotten the information and include the date it was published. Once you have completed your research, using the information you have gathered, create test scripts based on the following scenarios:\r\nA banking application allows users to log in with a username and password. The system should lock the account after three failed attempts. Write a test script to validate this functionality.\r\nAn e-commerce website allows customers to add items to their cart and proceed to checkout. The system should display a confirmation message when an order is successfully placed. Write a test script to validate this functionality.', '2025-04-04 00:00:00', NULL, 41, '2025-04-04 09:48:31', NULL),
+(35, 73, 'dbkj', ';mpocn', '2025-02-05 00:00:00', '/uploads/Pre-departure-Orientation.pdf', 41, '2025-04-09 05:06:08', NULL);
 
 -- --------------------------------------------------------
 
@@ -69,8 +70,26 @@ CREATE TABLE `assignment_submissions` (
 --
 
 INSERT INTO `assignment_submissions` (`submission_id`, `assignment_id`, `student_id`, `file_path`, `submitted_at`, `grade`, `feedback`, `external_link`, `submission_text`) VALUES
-(18, 34, 43, 'uploads\\1e429fe9-a0d7-4165-8292-35dd445f7160_Pre-departure-Orientation.pdf', '2025-04-06 03:40:09', NULL, NULL, NULL, 'guhh'),
-(19, 34, 43, 'uploads\\cdb09737-22d1-4cc1-a03f-a7744ac00fbb_code.png', '2025-04-06 03:43:02', NULL, NULL, NULL, 'TEST');
+(18, 34, 43, 'uploads\\1e429fe9-a0d7-4165-8292-35dd445f7160_Pre-departure-Orientation.pdf', '2025-04-06 03:40:09', 5.00, 'lack ', NULL, 'guhh'),
+(19, 34, 43, 'uploads\\cdb09737-22d1-4cc1-a03f-a7744ac00fbb_code.png', '2025-04-06 03:43:02', 10.00, 'wlas', NULL, 'TEST');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `calendar_events`
+--
+
+CREATE TABLE `calendar_events` (
+  `event_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `date` date NOT NULL,
+  `time` time DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `type` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -129,7 +148,7 @@ INSERT INTO `courses` (`course_id`, `course_name`, `section`, `user_id`, `class_
 (76, 'GEC010', 'BSPH-2A', 41, 'TUE'),
 (77, 'GEC010', 'BSN-1A', 41, 'MON'),
 (79, 'GEC010', 'BSN-1B', 41, 'TUE'),
-(80, 'GEC01-', 'BSTM-2A', 41, 'MON');
+(81, 'GEC010', 'BSN-1C', 41, 'FRI');
 
 -- --------------------------------------------------------
 
@@ -161,7 +180,6 @@ INSERT INTO `course_content` (`content_id`, `course_id`, `title`, `content`, `cr
 (14, 36, 'mv jhgi', 'jkvuyfyu', '2025-02-24 11:52:50', 'uploads\\Gultiano_TLA2.docx', NULL, 22),
 (15, 56, 'GAA', 'FD', '2025-03-31 07:15:47', 'uploads\\inventory-summary-2025-03-11 (1).csv', NULL, 22),
 (16, 73, 'Pre-Survey form for the Cebu Tour', 'Good day @everyone and Happy New Year! For those who are enrolled in ELEC014 - Seminars, Workshops, please accomplish this pre-survey form for the Cebu Tour:\r\n', '2025-04-04 09:06:49', 'uploads\\Gultiano_TLA4.pdf', NULL, 41),
-(17, 73, 'Seminar Session', 'Good evening @everyone, for seminars, tours, and workshops this week, our session will be on January 11, 2025 (Saturday) with an invited speaker, that means no meeting will be conducted based on your class schedules.', '2025-04-04 09:15:15', NULL, NULL, 41),
 (18, 73, 'Parents Orientation', 'Good day @everyone! For Seminars, Tours, and Workshops, please be informed that there will be a parent\'s orientation on January 18, 2025 (Saturday) 10AM - 12 NN @ L205 to discuss the proposed itenerary for the Cebu Tour and other important details related to it. This orientation will be conducted in hybrid setup. Thank you!', '2025-04-04 09:18:17', NULL, NULL, 41),
 (19, 73, 'Seminar Session', 'Good day @everyone, due to a conflict of schedules in labs, please be informed that we will have our seminar session tomorrow @ 9am - 12nn via Google Meet. I will send the meet link later. Thank you!\r\n', '2025-04-04 09:18:46', NULL, NULL, 41),
 (20, 73, 'Seminar Session', 'Good day everyone!\r\nDue to unforeseen changes, we will have our seminar session tomorrow @ 1PM - 5 PM via Google Meet:', '2025-04-04 09:19:30', NULL, NULL, 41),
@@ -230,11 +248,20 @@ CREATE TABLE `exam_submissions` (
   `submission_id` int(11) NOT NULL,
   `exam_id` int(11) DEFAULT NULL,
   `student_id` int(11) DEFAULT NULL,
-  `answers` text DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `external_link` varchar(255) DEFAULT NULL,
+  `submission_text` text DEFAULT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `grade` decimal(5,2) DEFAULT NULL,
   `feedback` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exam_submissions`
+--
+
+INSERT INTO `exam_submissions` (`submission_id`, `exam_id`, `student_id`, `file_path`, `external_link`, `submission_text`, `submitted_at`, `grade`, `feedback`) VALUES
+(1, 9, 43, 'uploads\\940d4f6e-eb28-470b-a28d-1de73e91f978_Pre-departure-Orientation.pdf', 'string', 'hahahah', '2025-04-08 11:18:44', 10.00, 'wala');
 
 -- --------------------------------------------------------
 
@@ -246,13 +273,22 @@ CREATE TABLE `grades` (
   `grade_id` int(11) NOT NULL,
   `student_id` int(11) DEFAULT NULL,
   `course_id` int(11) DEFAULT NULL,
-  `assignment_id` int(11) DEFAULT NULL,
-  `quiz_id` int(11) DEFAULT NULL,
-  `exam_id` int(11) DEFAULT NULL,
-  `grade` decimal(5,2) NOT NULL,
-  `feedback` text DEFAULT NULL,
-  `recorded_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `recorded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `school_year` varchar(9) NOT NULL,
+  `semester` enum('1st','2nd') NOT NULL,
+  `prelim_grade` decimal(5,2) DEFAULT NULL,
+  `midterm_grade` decimal(5,2) DEFAULT NULL,
+  `finals_grade` decimal(5,2) DEFAULT NULL,
+  `overall_grade` decimal(5,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `grades`
+--
+
+INSERT INTO `grades` (`grade_id`, `student_id`, `course_id`, `recorded_at`, `school_year`, `semester`, `prelim_grade`, `midterm_grade`, `finals_grade`, `overall_grade`) VALUES
+(2, 43, 73, '2025-04-09 08:00:25', '2024-2025', '1st', 85.00, 74.00, 75.00, 78.00),
+(3, 35, 73, '2025-04-09 10:40:49', '2024-2025', '1st', 70.00, 80.00, 90.00, 80.00);
 
 -- --------------------------------------------------------
 
@@ -296,7 +332,7 @@ INSERT INTO `quizzes` (`quiz_id`, `course_id`, `title`, `description`, `created_
 (4, 37, 'asasa', 'sasa', '2025-02-24 00:43:21', '1111-11-11', 11, 22, NULL),
 (9, 18, 'string', 'string', '2025-03-30 09:33:32', '0000-00-00', 10, 22, 'https://forms.gle/fakWLQQgTLqboFrh8'),
 (10, 18, 'AHAHAHAHAH', 'LM, KLJBOIN', '2025-03-31 06:11:42', '0000-00-00', 20, 22, 'https://docs.google.com/forms/d/e/1FAIpQLSc6vNAigL6-BpNkAMm1Nqx3Gu2bCRPDvuwuV3CVyWmSpLHRBQ/viewform'),
-(11, 73, 'Quiz 1', 'Answer the quiz(dont use chatbots)', '2025-04-04 09:45:31', '2025-04-04', 10, 41, 'https://docs.google.com/forms/d/e/1FAIpQLSd_98cdtOpa13dy_fQK5hCPxyD2DvGfDeIxxuWehBkE5LlZdg/alreadyresponded?hr_submission=ChkIn6OTsdQPEhAI1-XKmfMVEgcI8_DEwYIVEAE');
+(15, 73, 'eqqe', 'qdada', '2025-04-08 10:19:11', '2025-02-05', 20, 41, 'https://mail.google.com/mail/u/0/?pli=1#inbox/FMfcgzQZTzdWzvRHvMRvfncjpWrBMwhM');
 
 -- --------------------------------------------------------
 
@@ -308,11 +344,20 @@ CREATE TABLE `quiz_submissions` (
   `submission_id` int(11) NOT NULL,
   `quiz_id` int(11) DEFAULT NULL,
   `student_id` int(11) DEFAULT NULL,
-  `answers` text DEFAULT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `grade` decimal(5,2) DEFAULT NULL,
-  `feedback` text DEFAULT NULL
+  `feedback` text DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `external_link` varchar(255) DEFAULT NULL,
+  `submission_text` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quiz_submissions`
+--
+
+INSERT INTO `quiz_submissions` (`submission_id`, `quiz_id`, `student_id`, `submitted_at`, `grade`, `feedback`, `file_path`, `external_link`, `submission_text`) VALUES
+(1, 15, 43, '2025-04-08 11:27:52', 10.00, 'none', 'uploads\\10425500-2d31-4d58-bcea-e3bfc6daf5d4_Pre-departure-Orientation.pdf', 'string', 'gugujv');
 
 -- --------------------------------------------------------
 
@@ -336,8 +381,7 @@ CREATE TABLE `students` (
 INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `last_name`, `enrollment_date`) VALUES
 (7, 34, 'SN000034', 'Asi', '', '2025-04-01'),
 (8, 35, 'SN000035', 'Kobe', '', '2025-04-01'),
-(9, 36, 'SN000036', 'Tine', '', '2025-04-01'),
-(12, 43, 'SN000043', 'Geric', 'Gultiano', '2025-04-03');
+(9, 36, 'SN000036', 'Tine', '', '2025-04-01');
 
 -- --------------------------------------------------------
 
@@ -357,7 +401,9 @@ CREATE TABLE `student_courses` (
 --
 
 INSERT INTO `student_courses` (`enrollment_id`, `student_id`, `course_id`, `enrolled_at`) VALUES
-(22, 43, 73, '2025-04-04 08:57:49');
+(22, 43, 73, '2025-04-04 08:57:49'),
+(23, 35, 73, '2025-04-09 09:18:02'),
+(26, 34, 73, '2025-04-09 09:56:59');
 
 -- --------------------------------------------------------
 
@@ -408,6 +454,13 @@ ALTER TABLE `assignment_submissions`
   ADD KEY `student_id` (`student_id`);
 
 --
+-- Indexes for table `calendar_events`
+--
+ALTER TABLE `calendar_events`
+  ADD PRIMARY KEY (`event_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `courses`
 --
 ALTER TABLE `courses`
@@ -452,10 +505,7 @@ ALTER TABLE `exam_submissions`
 ALTER TABLE `grades`
   ADD PRIMARY KEY (`grade_id`),
   ADD KEY `student_id` (`student_id`),
-  ADD KEY `course_id` (`course_id`),
-  ADD KEY `assignment_id` (`assignment_id`),
-  ADD KEY `quiz_id` (`quiz_id`),
-  ADD KEY `exam_id` (`exam_id`);
+  ADD KEY `course_id` (`course_id`);
 
 --
 -- Indexes for table `instructors`
@@ -510,7 +560,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `assignment_submissions`
@@ -519,10 +569,16 @@ ALTER TABLE `assignment_submissions`
   MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
+-- AUTO_INCREMENT for table `calendar_events`
+--
+ALTER TABLE `calendar_events`
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `course_content`
@@ -546,13 +602,13 @@ ALTER TABLE `exams`
 -- AUTO_INCREMENT for table `exam_submissions`
 --
 ALTER TABLE `exam_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `grades`
 --
 ALTER TABLE `grades`
-  MODIFY `grade_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `grade_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `instructors`
@@ -564,25 +620,25 @@ ALTER TABLE `instructors`
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `quiz_submissions`
 --
 ALTER TABLE `quiz_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `student_courses`
 --
 ALTER TABLE `student_courses`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -607,6 +663,12 @@ ALTER TABLE `assignments`
 ALTER TABLE `assignment_submissions`
   ADD CONSTRAINT `assignment_submissions_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`assignment_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `assignment_submissions_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `calendar_events`
+--
+ALTER TABLE `calendar_events`
+  ADD CONSTRAINT `calendar_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `courses`
@@ -647,10 +709,7 @@ ALTER TABLE `exam_submissions`
 --
 ALTER TABLE `grades`
   ADD CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `grades_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `grades_ibfk_3` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`assignment_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `grades_ibfk_4` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`quiz_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `grades_ibfk_5` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`exam_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `grades_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `instructors`

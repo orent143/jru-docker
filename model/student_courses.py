@@ -48,7 +48,7 @@ async def get_students_in_course(course_id: int, db_dep=Depends(get_db)):
 
     # Fetch enrolled students
     query = """
-        SELECT s.student_id, s.user_id, s.first_name, s.last_name
+        SELECT s.student_id, s.user_id, CONCAT(s.first_name, ' ', s.last_name) AS name
         FROM student_courses sc
         JOIN users s ON sc.student_id = s.user_id
         WHERE sc.course_id = %s
@@ -143,3 +143,29 @@ async def get_course_materials(course_id: int, db_dep=Depends(get_db)):
         "course_name": course["course_name"],
         "materials": course_materials
     }
+
+# ✅ Remove Student from a Course
+@router.delete("/student_courses/{student_id}/{course_id}")
+async def remove_student_from_course(student_id: int, course_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+
+    # Check if student exists
+    db.execute("SELECT user_id FROM users WHERE user_id = %s AND role = 'student'", (student_id,))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Check if course exists
+    db.execute("SELECT course_id FROM courses WHERE course_id = %s", (course_id,))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Check if student is enrolled in the course
+    db.execute("SELECT * FROM student_courses WHERE student_id = %s AND course_id = %s", (student_id, course_id))
+    if not db.fetchone():
+        raise HTTPException(status_code=404, detail="Student is not enrolled in this course")
+
+    # Remove student from course
+    db.execute("DELETE FROM student_courses WHERE student_id = %s AND course_id = %s", (student_id, course_id))
+    conn.commit()
+
+    return {"message": "Student removed from course successfully"}

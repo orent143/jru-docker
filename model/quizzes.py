@@ -151,3 +151,5 @@ async def delete_quiz(quiz_id: int, db=Depends(get_db)):
 
 # Include the router in the app
 app.include_router(router)
+
+
