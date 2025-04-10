@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, FastAPI, Form
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import os
 import uuid  
 from .db import get_db
@@ -27,18 +27,29 @@ class AssignmentSubmission(BaseModel):
     file_path: str = None  
     external_link: str = None  
     submission_text: str
+    
+class AssignmentFeedback(BaseModel):
+    grade: float  # The grade (can be a float or an integer)
+    feedback: str = None  # Optional feedback
+
 @router.post("/submit-assignment/")
 async def submit_assignment(
-    student_id: int = Form(...),          # Expecting Form data for student_id
-    assignment_id: int = Form(...),       # Expecting Form data for assignment_id
-    file: UploadFile = File(None),        # File data, sent as multipart form data
-    external_link: str = Form(None),      # External link, sent as Form data
-    submission_text: str = Form(...),     # Submission text, sent as Form data
-    db_dep=Depends(get_db)               # Inject the db dependency here
+    student_id: int = Form(...),
+    assignment_id: int = Form(...),
+    file: UploadFile = File(None),
+    external_link: str = Form(None),
+    submission_text: str = Form(...),
+    db_dep=Depends(get_db)
 ):
     """Handle assignment submission."""
     db, conn = db_dep
     file_path = None
+
+    # Check if a submission already exists for this student and assignment
+    db.execute("SELECT * FROM assignment_submissions WHERE student_id = %s AND assignment_id = %s", (student_id, assignment_id))
+    existing_submission = db.fetchone()
+    if existing_submission:
+        raise HTTPException(status_code=400, detail="Submission already exists for this assignment")
 
     # Process file upload if provided
     if file and file.filename:
@@ -75,6 +86,29 @@ async def submit_assignment(
         status_code=200
     )
 
+@router.delete("/assignment-submission/{submission_id}")
+async def delete_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+
+    # Check if the assignment submission exists
+    db.execute("SELECT * FROM assignment_submissions WHERE submission_id = %s", (submission_id,))
+    submission = db.fetchone()
+    if not submission:
+        raise HTTPException(status_code=404, detail="Assignment submission not found")
+
+    # Delete the submission
+    query = "DELETE FROM assignment_submissions WHERE submission_id = %s"
+    try:
+        db.execute(query, (submission_id,))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    return JSONResponse(
+        content={"message": "Submission deleted successfully"},
+        status_code=200
+    )
 
 @router.get("/student-assignment/{course_id}")
 async def get_course_assignments(course_id: int, db_dep=Depends(get_db)):
@@ -137,19 +171,24 @@ async def get_student_assignments(student_id: int, course_id: int, db_dep=Depend
         "assignments": result
     }
 
-
 @router.get("/assignment_submissions/{assignment_id}")
 async def get_submitted_assignments(assignment_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
+    # Check if the assignment exists
     db.execute("SELECT * FROM assignments WHERE assignment_id = %s", (assignment_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Assignment not found")
 
+    # Modify the query to fetch student names along with other submission details
     query = """
-        SELECT student_id, file_path, submission_text, submitted_at
-        FROM assignment_submissions
-        WHERE assignment_id = %s ORDER BY submitted_at DESC
+        SELECT asb.submission_id, asb.student_id, u.name AS student_name, 
+               asb.file_path, asb.submission_text, asb.submitted_at,
+               asb.grade, asb.feedback
+        FROM assignment_submissions asb
+        JOIN users u ON asb.student_id = u.user_id
+        WHERE asb.assignment_id = %s
+        ORDER BY asb.submitted_at DESC
     """
     db.execute(query, (assignment_id,))
     submissions = db.fetchall()
@@ -178,3 +217,62 @@ async def download_file(file_name: str):
         return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
     
     raise HTTPException(status_code=404, detail="File not found")
+
+@router.put("/assignment-submission/{submission_id}/grade")
+async def update_assignment_submission_grade(
+    submission_id: int,
+    feedback: AssignmentFeedback,
+    db_dep=Depends(get_db)
+):
+    db, conn = db_dep
+
+    # Check if the assignment submission exists
+    db.execute("SELECT * FROM assignment_submissions WHERE submission_id = %s", (submission_id,))
+    submission = db.fetchone()
+    if not submission:
+        raise HTTPException(status_code=404, detail="Assignment submission not found")
+
+    # Update the grade and feedback
+    query = """
+        UPDATE assignment_submissions
+        SET grade = %s, feedback = %s
+        WHERE submission_id = %s
+    """
+    try:
+        db.execute(query, (feedback.grade, feedback.feedback, submission_id))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    return JSONResponse(
+        content={"message": "Grade and feedback updated successfully"},
+        status_code=200
+    )
+
+@router.get("/assignment-submission/{submission_id}")
+async def get_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+
+    query = """
+        SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
+               asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
+               asb.grade, asb.feedback
+        FROM assignment_submissions asb
+        JOIN users u ON asb.student_id = u.user_id
+        WHERE asb.submission_id = %s
+    """
+    db.execute(query, (submission_id,))
+    submission = db.fetchone()
+
+    if not submission:
+        raise HTTPException(status_code=404, detail="Assignment submission not found")
+
+    return submission
+
+@router.get("/assignments/download/{file_name}")
+async def download_file(file_name: str):
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(path=file_path, filename=file_name)

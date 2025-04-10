@@ -1,8 +1,9 @@
 from fastapi import Depends, HTTPException, APIRouter, Form, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 from .db import get_db
 import os
+import uuid
 
 router = APIRouter()
 
@@ -18,12 +19,17 @@ class StudentExam(BaseModel):
     description: str
     exam_date: str
 
-# ✅ Schema for exam submission
 class ExamSubmission(BaseModel):
     student_id: int
     exam_id: int
     answers: dict
+    file: UploadFile = None  # Allow optional file submission
+    external_link: str = None  # Allow optional external link submission
 
+class ExamFeedback(BaseModel):
+    grade: float  # The grade (can be a float or an integer)
+    feedback: str = None  # Optional feedback
+    
 # ✅ Create an Exam for a Course (with file upload and external link)
 @router.post("/exams/")
 async def create_exam(
@@ -67,11 +73,11 @@ async def create_exam(
         "external_link": external_link
     }
 
-# ✅ Get Exams for a Course (Faculty View)
 @router.get("/exams/{course_id}")
 async def get_course_exams(course_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
+    # Ensure course exists
     db.execute("SELECT course_id FROM courses WHERE course_id = %s", (course_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Course not found")
@@ -94,7 +100,7 @@ async def get_course_exams(course_id: int, db_dep=Depends(get_db)):
 
     return {"course_id": course_id, "exams": exams}
 
-# ✅ Get Exams for a Specific Student (with file downloads and external links)
+
 @router.get("/student_exams/{student_id}/{course_id}")
 async def get_student_exams(student_id: int, course_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -142,7 +148,7 @@ async def get_student_exams(student_id: int, course_id: int, db_dep=Depends(get_
 
 # ✅ Download file
 @router.get("/exams/download/{file_name}")
-async def download_file(file_name: str):
+async def download_exam_file(file_name: str):
     file_name = os.path.basename(file_name)  # Sanitize file name
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
@@ -151,39 +157,235 @@ async def download_file(file_name: str):
     
     raise HTTPException(status_code=404, detail="File not found")
 
-# ✅ Submit an Exam
-@router.post("/exam_submissions/")
-async def submit_exam(submission: ExamSubmission, db_dep=Depends(get_db)):
+@router.post("/submit-exam/")
+async def submit_exam(
+    student_id: int = Form(...),          # Expecting Form data for student_id
+    exam_id: int = Form(...),             # Expecting Form data for exam_id
+    submission_text: str = Form(None),    # Optional submission text
+    file: UploadFile = File(None),        # File data, sent as multipart form data
+    external_link: str = Form(None),      # External link, sent as Form data
+    db_dep=Depends(get_db)               # Inject the db dependency here
+):
+    """Handle exam submission."""
+    db, conn = db_dep
+    file_path = None
+
+    try:
+        # Check if the exam exists
+        db.execute("SELECT * FROM exams WHERE exam_id = %s", (exam_id,))
+        exam = db.fetchone()
+        if not exam:
+            raise HTTPException(status_code=404, detail="Exam not found")
+
+        # Check if the student is enrolled in the course
+        db.execute("SELECT * FROM student_courses WHERE student_id = %s AND course_id = %s", 
+                  (student_id, exam['course_id']))
+        if not db.fetchone():
+            raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
+        
+        # Check if the student has already submitted for this exam
+        db.execute("SELECT * FROM exam_submissions WHERE student_id = %s AND exam_id = %s", (student_id, exam_id))
+        if db.fetchone():
+            raise HTTPException(status_code=400, detail="You have already submitted for this exam")
+
+        # Process file upload if provided
+        if file and file.filename:
+            unique_filename = f"{uuid.uuid4()}_{file.filename}"
+            file_path = os.path.join(UPLOAD_DIR, unique_filename)
+            try:
+                with open(file_path, "wb") as f:
+                    f.write(await file.read())
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+        # If external link provided, use it
+        elif external_link:
+            file_path = external_link
+
+        # Ensure either file or external link is provided
+        if not file_path:
+            raise HTTPException(status_code=400, detail="Either a file or an external link must be provided")
+
+        # Insert exam submission into the database
+        query = """
+            INSERT INTO exam_submissions (exam_id, student_id, file_path, external_link, submission_text)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        db.execute(query, (exam_id, student_id, file_path, external_link, submission_text))
+        conn.commit()
+
+        return JSONResponse(
+            content={"message": "Exam submitted successfully", "file_path": file_path, "external_link": external_link}, 
+            status_code=200
+        )
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
+
+@router.get("/exam-submissions/{exam_id}")
+async def get_exam_submissions(exam_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    db.execute("SELECT * FROM exams WHERE exam_id = %s", (submission.exam_id,))
-    if not db.fetchone():
-        raise HTTPException(status_code=404, detail="Exam not found")
+    try:
+        query = """
+            SELECT es.submission_id, es.exam_id, es.student_id, u.name AS student_name, 
+                   es.file_path, es.external_link, es.submission_text, es.submitted_at,
+                   es.grade, es.feedback
+            FROM exam_submissions es
+            JOIN users u ON es.student_id = u.user_id
+            WHERE es.exam_id = %s
+            ORDER BY es.submitted_at DESC
+        """
+        db.execute(query, (exam_id,))
+        submissions = db.fetchall()
 
-    db.execute("SELECT * FROM student_courses WHERE student_id = %s", (submission.student_id,))
-    if not db.fetchone():
-        raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
+        return {"exam_id": exam_id, "submissions": submissions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
 
+@router.get("/exam-submission/{submission_id}")
+async def get_exam_submission(submission_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+
+    try:
+        query = """
+            SELECT es.submission_id, es.exam_id, es.student_id, u.name AS student_name, 
+                   es.file_path, es.external_link, es.submission_text, es.submitted_at,
+                   es.grade, es.feedback
+            FROM exam_submissions es
+            JOIN users u ON es.student_id = u.user_id
+            WHERE es.submission_id = %s
+        """
+        db.execute(query, (submission_id,))
+        submission = db.fetchone()
+
+        if not submission:
+            raise HTTPException(status_code=404, detail="Exam submission not found")
+
+        return submission
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
+
+@router.get("/exam-submission/{exam_id}/{student_id}")
+async def get_student_exam_submission(exam_id: int, student_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+
+    try:
+        query = """
+            SELECT es.submission_id, es.exam_id, es.student_id, u.name AS student_name, 
+                   es.file_path, es.external_link, es.submission_text, es.submitted_at,
+                   es.grade, es.feedback
+            FROM exam_submissions es
+            JOIN users u ON es.student_id = u.user_id
+            WHERE es.exam_id = %s AND es.student_id = %s
+        """
+        db.execute(query, (exam_id, student_id))
+        submission = db.fetchone()
+
+        if not submission:
+            raise HTTPException(status_code=404, detail="Exam submission not found")
+
+        return submission
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
+
+@router.delete("/exam-submission/{submission_id}")
+async def delete_exam_submission(submission_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+    
+    try:
+        # Check if the submission exists
+        db.execute("SELECT * FROM exam_submissions WHERE submission_id = %s", (submission_id,))
+        submission = db.fetchone()
+        
+        if not submission:
+            raise HTTPException(status_code=404, detail="Exam submission not found")
+        
+        # Delete the submission
+        query = "DELETE FROM exam_submissions WHERE submission_id = %s"
+        db.execute(query, (submission_id,))
+        conn.commit()
+        
+        return JSONResponse(
+            content={"message": "Exam submission deleted successfully"},
+            status_code=200
+        )
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
+
+@router.put("/exam-submission/{submission_id}/grade")
+async def update_exam_submission_grade(
+    submission_id: int,
+    feedback: ExamFeedback,
+    db_dep=Depends(get_db)
+):
+    db, conn = db_dep
+
+    # Check if the exam submission exists
+    db.execute("SELECT * FROM exam_submissions WHERE submission_id = %s", (submission_id,))
+    submission = db.fetchone()
+    if not submission:
+        raise HTTPException(status_code=404, detail="Exam submission not found")
+
+    # Update the grade and feedback
     query = """
-        INSERT INTO exam_submissions (exam_id, student_id, answers)
-        VALUES (%s, %s, %s)
+        UPDATE exam_submissions
+        SET grade = %s, feedback = %s
+        WHERE submission_id = %s
     """
-    db.execute(query, (submission.exam_id, submission.student_id, str(submission.answers)))
-    conn.commit()
+    try:
+        db.execute(query, (feedback.grade, feedback.feedback, submission_id))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    return {"message": "Exam submitted successfully"}
-
-# ✅ Get Submitted Exam Responses
-@router.get("/exam_submissions/{exam_id}")
-async def get_exam_submissions(exam_id: int, db_dep=Depends(get_db)):
-    db, conn = db_dep  
-
-    query = """
-        SELECT student_id, score, submitted_at 
-        FROM exam_submissions 
-        WHERE exam_id = %s
-    """
-    db.execute(query, (exam_id,))
-    submissions = db.fetchall()
-
-    return {"exam_id": exam_id, "submissions": submissions}
+    return JSONResponse(
+        content={"message": "Grade and feedback updated successfully"},
+        status_code=200
+    )
