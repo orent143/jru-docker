@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 09, 2025 at 01:22 PM
+-- Generation Time: Apr 11, 2025 at 09:53 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -70,8 +70,7 @@ CREATE TABLE `assignment_submissions` (
 --
 
 INSERT INTO `assignment_submissions` (`submission_id`, `assignment_id`, `student_id`, `file_path`, `submitted_at`, `grade`, `feedback`, `external_link`, `submission_text`) VALUES
-(18, 34, 43, 'uploads\\1e429fe9-a0d7-4165-8292-35dd445f7160_Pre-departure-Orientation.pdf', '2025-04-06 03:40:09', 5.00, 'lack ', NULL, 'guhh'),
-(19, 34, 43, 'uploads\\cdb09737-22d1-4cc1-a03f-a7744ac00fbb_code.png', '2025-04-06 03:43:02', 10.00, 'wlas', NULL, 'TEST');
+(25, 35, 43, 'uploads\\76c95dd8-34da-4cd8-aa80-9864e9a1030e_Tech business purple logo (3).png', '2025-04-11 04:52:09', NULL, NULL, NULL, 'asa');
 
 -- --------------------------------------------------------
 
@@ -88,8 +87,38 @@ CREATE TABLE `calendar_events` (
   `type` varchar(50) NOT NULL,
   `user_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `course_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `calendar_events`
+--
+
+INSERT INTO `calendar_events` (`event_id`, `title`, `date`, `time`, `description`, `type`, `user_id`, `created_at`, `updated_at`, `course_id`) VALUES
+(1, 'Orientation', '2025-04-15', '07:40:00', 'Cebu Orientation', 'meeting', 41, '2025-04-11 05:39:47', '2025-04-11 05:39:47', 73);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `entity_type` enum('assignment','quiz','material','exam') NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`comment_id`, `user_id`, `entity_type`, `entity_id`, `content`, `created_at`) VALUES
+(1, 43, 'quiz', 15, 'HI', '2025-04-11 19:48:51');
 
 -- --------------------------------------------------------
 
@@ -256,13 +285,6 @@ CREATE TABLE `exam_submissions` (
   `feedback` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `exam_submissions`
---
-
-INSERT INTO `exam_submissions` (`submission_id`, `exam_id`, `student_id`, `file_path`, `external_link`, `submission_text`, `submitted_at`, `grade`, `feedback`) VALUES
-(1, 9, 43, 'uploads\\940d4f6e-eb28-470b-a28d-1de73e91f978_Pre-departure-Orientation.pdf', 'string', 'hahahah', '2025-04-08 11:18:44', 10.00, 'wala');
-
 -- --------------------------------------------------------
 
 --
@@ -288,7 +310,8 @@ CREATE TABLE `grades` (
 
 INSERT INTO `grades` (`grade_id`, `student_id`, `course_id`, `recorded_at`, `school_year`, `semester`, `prelim_grade`, `midterm_grade`, `finals_grade`, `overall_grade`) VALUES
 (2, 43, 73, '2025-04-09 08:00:25', '2024-2025', '1st', 85.00, 74.00, 75.00, 78.00),
-(3, 35, 73, '2025-04-09 10:40:49', '2024-2025', '1st', 70.00, 80.00, 90.00, 80.00);
+(3, 35, 73, '2025-04-09 10:40:49', '2024-2025', '1st', 70.00, 80.00, 90.00, 80.00),
+(4, 34, 73, '2025-04-09 11:40:36', '2024-2025', '1st', 82.00, 60.00, 75.00, 72.33);
 
 -- --------------------------------------------------------
 
@@ -357,7 +380,7 @@ CREATE TABLE `quiz_submissions` (
 --
 
 INSERT INTO `quiz_submissions` (`submission_id`, `quiz_id`, `student_id`, `submitted_at`, `grade`, `feedback`, `file_path`, `external_link`, `submission_text`) VALUES
-(1, 15, 43, '2025-04-08 11:27:52', 10.00, 'none', 'uploads\\10425500-2d31-4d58-bcea-e3bfc6daf5d4_Pre-departure-Orientation.pdf', 'string', 'gugujv');
+(4, 15, 43, '2025-04-11 04:47:25', NULL, NULL, 'uploads\\dfacc462-bd31-4137-92fa-d65dc3219ff6_Top 5 Cybersecurity Threats in 2023 and How to Defend Against Them _ Aurosign.jpg', NULL, 'sasa');
 
 -- --------------------------------------------------------
 
@@ -371,6 +394,7 @@ CREATE TABLE `students` (
   `student_number` varchar(50) NOT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
+  `degree` varchar(100) NOT NULL,
   `enrollment_date` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -378,10 +402,11 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `last_name`, `enrollment_date`) VALUES
-(7, 34, 'SN000034', 'Asi', '', '2025-04-01'),
-(8, 35, 'SN000035', 'Kobe', '', '2025-04-01'),
-(9, 36, 'SN000036', 'Tine', '', '2025-04-01');
+INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `last_name`, `degree`, `enrollment_date`) VALUES
+(7, 34, 'SN000034', 'Asi', '', '', '2025-04-01'),
+(8, 35, 'SN000035', 'Kobe', '', '', '2025-04-01'),
+(9, 36, 'SN000036', 'Tine', '', '', '2025-04-01'),
+(44, 43, 'SN000043', 'Geric', 'Gultiano', 'Information Technology', '2025-04-11');
 
 -- --------------------------------------------------------
 
@@ -431,7 +456,7 @@ INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `created_at
 (36, 'Tine', 'justineslozada@gmail.com', 'JUSTINE', 'student', '2025-04-02 05:23:53'),
 (40, 'Admin', 'orentgultiano11@gmail.com', '$2b$12$ldWtvfFWUHI46kxGYCJBq.e/AY2rCaOJ2RRRdHW95zwl9aiFcVEKq', 'admin', '2025-04-03 11:46:34'),
 (41, 'Sir Geric', 'wlage35@gmail.com', '$2b$12$SGCrupcTfBGfLBjzYP1e5ubVpZNlPibPR0UIcCc4DKNVLAWWfVcsG', 'faculty', '2025-04-04 08:25:13'),
-(43, 'Geric Gultiano', 'ggultiano_220000000886@uic.edu.ph', '$2b$12$mYBWVj2H1Zz2SJZ6fvRYs.rMEkojdurD1F6Vl3x2fXSblRdNhtIJ.', 'student', '2025-04-04 08:31:48');
+(43, 'Geric Gultiano', 'ggultiano_220000000886@uic.edu.ph', '$2b$12$uRsjgAU6XLaxbUfg21pL8.r4P27tAmsqaVvHDUzN/YLeaTFSIPRlu', 'student', '2025-04-04 08:31:48');
 
 --
 -- Indexes for dumped tables
@@ -458,7 +483,16 @@ ALTER TABLE `assignment_submissions`
 --
 ALTER TABLE `calendar_events`
   ADD PRIMARY KEY (`event_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `course_id` (`course_id`);
+
+--
+-- Indexes for table `comments`
+--
+ALTER TABLE `comments`
+  ADD PRIMARY KEY (`comment_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `entity_type` (`entity_type`,`entity_id`);
 
 --
 -- Indexes for table `courses`
@@ -566,13 +600,19 @@ ALTER TABLE `assignments`
 -- AUTO_INCREMENT for table `assignment_submissions`
 --
 ALTER TABLE `assignment_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `calendar_events`
 --
 ALTER TABLE `calendar_events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `comments`
+--
+ALTER TABLE `comments`
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `courses`
@@ -602,13 +642,13 @@ ALTER TABLE `exams`
 -- AUTO_INCREMENT for table `exam_submissions`
 --
 ALTER TABLE `exam_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `grades`
 --
 ALTER TABLE `grades`
-  MODIFY `grade_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `grade_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `instructors`
@@ -626,13 +666,13 @@ ALTER TABLE `quizzes`
 -- AUTO_INCREMENT for table `quiz_submissions`
 --
 ALTER TABLE `quiz_submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `student_courses`
@@ -644,7 +684,7 @@ ALTER TABLE `student_courses`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- Constraints for dumped tables
@@ -668,7 +708,15 @@ ALTER TABLE `assignment_submissions`
 -- Constraints for table `calendar_events`
 --
 ALTER TABLE `calendar_events`
-  ADD CONSTRAINT `calendar_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `calendar_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `calendar_events_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`),
+  ADD CONSTRAINT `calendar_events_ibfk_3` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`);
+
+--
+-- Constraints for table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `courses`
