@@ -16,6 +16,7 @@ from model.grades import router as grades_router
 from model.students import router as students_router
 from model.instructors import router as instructors_router
 from model.calendar_events import router as calendar_events_router
+from model.comments import router as comments_router
 
 app = FastAPI()
 
@@ -45,3 +46,4 @@ app.include_router(grades_router, prefix="/api", tags=["Grades"])
 app.include_router(students_router, prefix="/api", tags=["Students"])
 app.include_router(instructors_router, prefix="/api", tags=["Instructors"])
 app.include_router(calendar_events_router, prefix="/api", tags=["Calendar Events"])
+app.include_router(comments_router, prefix="/api", tags=["Comments"])

@@ -210,13 +210,10 @@ async def download_submission_file(file_name: str):
 
 @router.get("/assignments/download/{file_name}")
 async def download_file(file_name: str):
-    file_name = os.path.basename(file_name)  
     file_path = os.path.join(UPLOAD_DIR, file_name)
-
-    if os.path.exists(file_path):
-        return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
-    
-    raise HTTPException(status_code=404, detail="File not found")
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(path=file_path, filename=file_name)
 
 @router.put("/assignment-submission/{submission_id}/grade")
 async def update_assignment_submission_grade(
@@ -250,29 +247,66 @@ async def update_assignment_submission_grade(
         status_code=200
     )
 
+@router.get("/assignment-submission/{assignment_id}/{student_id}")
+async def get_student_assignment_submission(assignment_id: int, student_id: int, db_dep=Depends(get_db)):
+    db, conn = db_dep
+    
+    try:
+        query = """
+            SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
+                   asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
+                   asb.grade, asb.feedback
+            FROM assignment_submissions asb
+            JOIN users u ON asb.student_id = u.user_id
+            WHERE asb.assignment_id = %s AND asb.student_id = %s
+        """
+        db.execute(query, (assignment_id, student_id))
+        submission = db.fetchone()
+
+        if not submission:
+            raise HTTPException(status_code=404, detail="Assignment submission not found")
+
+        return submission
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass
+
 @router.get("/assignment-submission/{submission_id}")
 async def get_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    query = """
-        SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
-               asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
-               asb.grade, asb.feedback
-        FROM assignment_submissions asb
-        JOIN users u ON asb.student_id = u.user_id
-        WHERE asb.submission_id = %s
-    """
-    db.execute(query, (submission_id,))
-    submission = db.fetchone()
+    try:
+        query = """
+            SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
+                   asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
+                   asb.grade, asb.feedback
+            FROM assignment_submissions asb
+            JOIN users u ON asb.student_id = u.user_id
+            WHERE asb.submission_id = %s
+        """
+        db.execute(query, (submission_id,))
+        submission = db.fetchone()
 
-    if not submission:
-        raise HTTPException(status_code=404, detail="Assignment submission not found")
+        if not submission:
+            raise HTTPException(status_code=404, detail="Assignment submission not found")
 
-    return submission
-
-@router.get("/assignments/download/{file_name}")
-async def download_file(file_name: str):
-    file_path = os.path.join(UPLOAD_DIR, file_name)
-    if not os.path.isfile(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(path=file_path, filename=file_name)
+        return submission
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while db.fetchone():
+                pass
+        except:
+            pass

@@ -142,3 +142,57 @@ async def delete_grade(grade_id: int, db=Depends(get_db)):
     connection.commit()
 
     return {"message": "Grade deleted successfully"}
+
+# Get grades by student ID (across all courses)
+@router.get("/student/{student_id}/grades")
+async def get_student_grades(student_id: int, db=Depends(get_db)):
+    cursor, connection = db
+    
+    try:
+        # First get the student's degree
+        cursor.execute("SELECT degree FROM students WHERE user_id = %s", (student_id,))
+        student_result = cursor.fetchone()
+        student_degree = student_result["degree"] if student_result else None
+        
+        # Then get the grades
+        query = """
+            SELECT g.grade_id, g.student_id, g.course_id, c.course_name as course_title, 
+                   g.prelim_grade, g.midterm_grade, g.finals_grade, 
+                   g.overall_grade, g.school_year, g.semester
+            FROM grades g 
+            JOIN courses c ON g.course_id = c.course_id
+            WHERE g.student_id = %s
+            ORDER BY g.school_year DESC, g.semester, c.course_name
+        """
+        cursor.execute(query, (student_id,))
+        results = cursor.fetchall()
+        
+        grades = []
+        for row in results:
+            grades.append({
+                "grade_id": row["grade_id"],
+                "student_id": row["student_id"],
+                "course_id": row["course_id"],
+                "course_title": row["course_title"],
+                "prelim_grade": row["prelim_grade"],
+                "midterm_grade": row["midterm_grade"],
+                "finals_grade": row["finals_grade"],
+                "overall_grade": row["overall_grade"],
+                "school_year": row["school_year"],
+                "semester": row["semester"],
+                "degree": student_degree
+            })
+        
+        return {
+            "grades": grades,
+            "student_degree": student_degree
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        # Ensure we fetch any remaining results before closing
+        try:
+            while cursor.fetchone():
+                pass
+        except:
+            pass
