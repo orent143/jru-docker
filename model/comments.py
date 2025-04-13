@@ -6,11 +6,10 @@ from .db import get_db
 
 router = APIRouter()
 
-# ✅ Pydantic Models
 class CommentBase(BaseModel):
     content: str
-    entity_type: str  # 'assignment', 'quiz', 'material', 'exam'
-    entity_id: int    # assignment_id, quiz_id, content_id, or exam_id
+    entity_type: str  
+    entity_id: int    
     
 class CommentCreate(CommentBase):
     user_id: int
@@ -24,18 +23,15 @@ class CommentResponse(CommentBase):
     class Config:
         orm_mode = True
 
-# ✅ Create Comment
 @router.post("/comments/", response_model=CommentResponse)
 async def create_comment(comment: CommentCreate, db=Depends(get_db)):
     cursor, conn = db
     
-    # Validate user exists
     cursor.execute("SELECT name FROM users WHERE user_id = %s", (comment.user_id,))
     user = cursor.fetchone()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Validate entity exists based on entity_type
     if comment.entity_type == "assignment":
         cursor.execute("SELECT assignment_id FROM assignments WHERE assignment_id = %s", (comment.entity_id,))
     elif comment.entity_type == "quiz":
@@ -51,7 +47,6 @@ async def create_comment(comment: CommentCreate, db=Depends(get_db)):
     if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
     
-    # Insert comment
     query = """
         INSERT INTO comments (user_id, entity_type, entity_id, content, created_at)
         VALUES (%s, %s, %s, %s, NOW())
@@ -59,7 +54,6 @@ async def create_comment(comment: CommentCreate, db=Depends(get_db)):
     cursor.execute(query, (comment.user_id, comment.entity_type, comment.entity_id, comment.content))
     conn.commit()
     
-    # Get the created comment
     comment_id = cursor.lastrowid
     cursor.execute("""
         SELECT c.comment_id, c.user_id, u.name as user_name, c.entity_type, 
@@ -72,16 +66,13 @@ async def create_comment(comment: CommentCreate, db=Depends(get_db)):
     result = cursor.fetchone()
     return result
 
-# ✅ Get Comments
 @router.get("/comments/{entity_type}/{entity_id}", response_model=List[CommentResponse])
 async def get_comments(entity_type: str, entity_id: int, db=Depends(get_db)):
     cursor, _ = db
     
-    # Validate entity type
     if entity_type not in ["assignment", "quiz", "material", "exam"]:
         raise HTTPException(status_code=400, detail="Invalid entity type")
     
-    # Get comments for the entity
     query = """
         SELECT c.comment_id, c.user_id, u.name as user_name, c.entity_type, 
                c.entity_id, c.content, c.created_at
@@ -95,12 +86,10 @@ async def get_comments(entity_type: str, entity_id: int, db=Depends(get_db)):
     
     return comments
 
-# ✅ Delete Comment
 @router.delete("/comments/{comment_id}")
 async def delete_comment(comment_id: int, user_id: int, db=Depends(get_db)):
     cursor, conn = db
     
-    # Check if comment exists and belongs to the user
     cursor.execute(
         "SELECT user_id FROM comments WHERE comment_id = %s", (comment_id,)
     )
@@ -109,11 +98,9 @@ async def delete_comment(comment_id: int, user_id: int, db=Depends(get_db)):
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
     
-    # Only allow the comment creator to delete it
     if comment["user_id"] != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
     
-    # Delete the comment
     cursor.execute("DELETE FROM comments WHERE comment_id = %s", (comment_id,))
     conn.commit()
     

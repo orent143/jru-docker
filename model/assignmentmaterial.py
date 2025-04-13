@@ -7,29 +7,25 @@ from .db import get_db
 
 router = APIRouter()
 
-# Directory for uploaded files
 UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure the directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)  
 
-# Serve static files (uploaded files) in the 'uploads' directory
-app = FastAPI()  # FastAPI app is created here
+app = FastAPI()  
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
-# ✅ Schema
 class AssignmentCreate(BaseModel):
     course_id: int
     title: str
     description: str
     due_date: str
-    external_link: str = None  # Optionally accept an external link
+    file_path: str = None  # Use file_path for both files and links
 
 class AssignmentUpdate(BaseModel):
     title: str
     description: str
     due_date: str
-    external_link: str = None  # Optionally accept an external link
+    file_path: str = None  # Use file_path for both files and links
 
-# ✅ Create Assignment
 @router.post("/assignments")
 async def create_assignment(
     course_id: int = Form(...),
@@ -37,12 +33,11 @@ async def create_assignment(
     description: str = Form(...),
     due_date: str = Form(...),
     file: UploadFile = File(None),
-    external_link: str = Form(None),  # Accept external link
+    external_link: str = Form(None), 
     db=Depends(get_db)
 ):
     cursor, connection = db
 
-    # Ensure course exists
     cursor.execute("SELECT user_id FROM courses WHERE course_id = %s", (course_id,))
     course = cursor.fetchone()
     if not course:
@@ -50,24 +45,21 @@ async def create_assignment(
 
     user_id = course["user_id"]
 
-    # Handle file upload if no external link is provided
-    file_url = None
+    file_path = None
     if file:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(file.file.read())
 
-        # Store relative path for the file
-        file_url = f"/uploads/{file.filename}"
+        file_path = f"/uploads/{file.filename}"
     elif external_link:
-        # If an external link is provided, use it instead of file upload
-        file_url = external_link
+        file_path = external_link  # Store external link in the file_path field
 
-    # Insert assignment record into the database
+    # Only store in file_path field, external_link is no longer used
     query = """INSERT INTO assignments (course_id, title, description, due_date, file_path, user_id) 
                VALUES (%s, %s, %s, %s, %s, %s)"""
-    cursor.execute(query, (course_id, title, description, due_date, file_url, user_id))
+    cursor.execute(query, (course_id, title, description, due_date, file_path, user_id))
     connection.commit()
 
     assignment_id = cursor.lastrowid
@@ -76,11 +68,10 @@ async def create_assignment(
         "title": title,
         "description": description,
         "due_date": due_date,
-        "file_path": file_url,  # Return file URL (either local or external)
+        "file_path": file_path,  
         "user_id": user_id
     }
 
-# ✅ Get Assignments for a Course
 @router.get("/assignments/assignments/{course_id}")
 async def get_assignments(course_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -116,7 +107,6 @@ async def get_assignments(course_id: int, db=Depends(get_db)):
         ]
     }
 
-# ✅ Get Single Assignment (with file download link)
 @router.get("/assignments/item/{assignment_id}")
 async def get_assignment(assignment_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -141,12 +131,11 @@ async def get_assignment(assignment_id: int, db=Depends(get_db)):
         "file_path": file_url
     }
 
-# ✅ Download File (for uploaded files)
 
 @router.get("/assignments/download/{file_name}")
 async def download_file(file_name: str):
     """Download a file from the uploads directory"""
-    file_name = os.path.basename(file_name)  # Prevent directory traversal
+    file_name = os.path.basename(file_name) 
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
     if os.path.exists(file_path):
@@ -154,18 +143,56 @@ async def download_file(file_name: str):
     
     raise HTTPException(status_code=404, detail="File not found")
     
-# ✅ Update Assignment
 @router.put("/assignments/{assignment_id}")
-async def update_assignment(assignment_id: int, assignment: AssignmentUpdate, db=Depends(get_db)):
+async def update_assignment(
+    assignment_id: int,
+    title: str = Form(...),
+    description: str = Form(...),
+    due_date: str = Form(...),
+    file: UploadFile = File(None),
+    external_link: str = Form(None),
+    db=Depends(get_db)
+):
     cursor, connection = db
-    query = "UPDATE assignments SET title = %s, description = %s, due_date = %s WHERE assignment_id = %s"
-    cursor.execute(query, (assignment.title, assignment.description, assignment.due_date, assignment_id))
-    connection.commit()
-    if cursor.rowcount == 0:
+    
+    # Check if assignment exists
+    cursor.execute("SELECT * FROM assignments WHERE assignment_id = %s", (assignment_id,))
+    existing_assignment = cursor.fetchone()
+    if not existing_assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return {"message": "Assignment updated successfully"}
+    
+    # Handle file upload or external link
+    file_path = existing_assignment["file_path"]  # Default to existing file path
+    
+    if file and file.filename:
+        # Upload new file
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        with open(file_path, "wb") as buffer:
+            buffer.write(file.file.read())
+        file_path = f"/uploads/{file.filename}"
+    elif external_link:
+        # Use external link in file_path
+        file_path = external_link
+    
+    # Update assignment in database (only use file_path)
+    query = """
+    UPDATE assignments 
+    SET title = %s, description = %s, due_date = %s, file_path = %s
+    WHERE assignment_id = %s
+    """
+    cursor.execute(query, (title, description, due_date, file_path, assignment_id))
+    connection.commit()
+    
+    return {
+        "message": "Assignment updated successfully",
+        "assignment_id": assignment_id,
+        "title": title,
+        "description": description,
+        "due_date": due_date,
+        "file_path": file_path
+    }
 
-# ✅ Delete Assignment
 @router.delete("/assignments/{assignment_id}")
 async def delete_assignment(assignment_id: int, db=Depends(get_db)):
     cursor, connection = db

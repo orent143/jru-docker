@@ -25,12 +25,11 @@ class AssignmentSubmission(BaseModel):
     student_id: int
     assignment_id: int
     file_path: str = None  
-    external_link: str = None  
     submission_text: str
     
 class AssignmentFeedback(BaseModel):
-    grade: float  # The grade (can be a float or an integer)
-    feedback: str = None  # Optional feedback
+    grade: float  
+    feedback: str = None  
 
 @router.post("/submit-assignment/")
 async def submit_assignment(
@@ -45,13 +44,11 @@ async def submit_assignment(
     db, conn = db_dep
     file_path = None
 
-    # Check if a submission already exists for this student and assignment
     db.execute("SELECT * FROM assignment_submissions WHERE student_id = %s AND assignment_id = %s", (student_id, assignment_id))
     existing_submission = db.fetchone()
     if existing_submission:
         raise HTTPException(status_code=400, detail="Submission already exists for this assignment")
 
-    # Process file upload if provided
     if file and file.filename:
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
@@ -61,15 +58,13 @@ async def submit_assignment(
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-    # If external link provided, use it
     elif external_link:
-        file_path = external_link
+        file_path = external_link  # Store external link directly in file_path
 
-    # Ensure either file or external link is provided
     if not file_path:
         raise HTTPException(status_code=400, detail="Either a file or an external link must be provided")
 
-    # Insert into the database
+    # Only use file_path for both files and links
     query = """
         INSERT INTO assignment_submissions (student_id, assignment_id, file_path, submission_text)
         VALUES (%s, %s, %s, %s)
@@ -90,13 +85,11 @@ async def submit_assignment(
 async def delete_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the assignment submission exists
     db.execute("SELECT * FROM assignment_submissions WHERE submission_id = %s", (submission_id,))
     submission = db.fetchone()
     if not submission:
         raise HTTPException(status_code=404, detail="Assignment submission not found")
 
-    # Delete the submission
     query = "DELETE FROM assignment_submissions WHERE submission_id = %s"
     try:
         db.execute(query, (submission_id,))
@@ -146,7 +139,7 @@ async def get_student_assignments(student_id: int, course_id: int, db_dep=Depend
         raise HTTPException(status_code=404, detail="Course not found")
 
     query = """
-        SELECT assignment_id, title, description, due_date, file_path, external_link
+        SELECT assignment_id, title, description, due_date, file_path
         FROM assignments
         WHERE course_id = %s ORDER BY due_date ASC
     """
@@ -160,8 +153,7 @@ async def get_student_assignments(student_id: int, course_id: int, db_dep=Depend
             "title": assignment["title"],
             "description": assignment["description"],
             "due_date": assignment["due_date"],
-            "file_path": assignment["file_path"] if assignment["file_path"] else None,
-            "external_link": assignment["external_link"] if assignment["external_link"] else None
+            "file_path": assignment["file_path"] if assignment["file_path"] else None
         })
 
     return {
@@ -175,12 +167,10 @@ async def get_student_assignments(student_id: int, course_id: int, db_dep=Depend
 async def get_submitted_assignments(assignment_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the assignment exists
     db.execute("SELECT * FROM assignments WHERE assignment_id = %s", (assignment_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    # Modify the query to fetch student names along with other submission details
     query = """
         SELECT asb.submission_id, asb.student_id, u.name AS student_name, 
                asb.file_path, asb.submission_text, asb.submitted_at,
@@ -223,13 +213,11 @@ async def update_assignment_submission_grade(
 ):
     db, conn = db_dep
 
-    # Check if the assignment submission exists
     db.execute("SELECT * FROM assignment_submissions WHERE submission_id = %s", (submission_id,))
     submission = db.fetchone()
     if not submission:
         raise HTTPException(status_code=404, detail="Assignment submission not found")
 
-    # Update the grade and feedback
     query = """
         UPDATE assignment_submissions
         SET grade = %s, feedback = %s
@@ -254,7 +242,7 @@ async def get_student_assignment_submission(assignment_id: int, student_id: int,
     try:
         query = """
             SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
-                   asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
+                   asb.file_path, asb.submission_text, asb.submitted_at,
                    asb.grade, asb.feedback
             FROM assignment_submissions asb
             JOIN users u ON asb.student_id = u.user_id
@@ -272,7 +260,6 @@ async def get_student_assignment_submission(assignment_id: int, student_id: int,
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
-        # Ensure we fetch any remaining results before closing
         try:
             while db.fetchone():
                 pass
@@ -286,7 +273,7 @@ async def get_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
     try:
         query = """
             SELECT asb.submission_id, asb.assignment_id, asb.student_id, u.name AS student_name,
-                   asb.file_path, asb.external_link, asb.submission_text, asb.submitted_at,
+                   asb.file_path, asb.submission_text, asb.submitted_at,
                    asb.grade, asb.feedback
             FROM assignment_submissions asb
             JOIN users u ON asb.student_id = u.user_id
@@ -304,7 +291,6 @@ async def get_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
-        # Ensure we fetch any remaining results before closing
         try:
             while db.fetchone():
                 pass

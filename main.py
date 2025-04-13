@@ -20,17 +20,15 @@ from model.comments import router as comments_router
 
 app = FastAPI()
 
-# Enable CORS to allow frontend to access the backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow requests from frontend
+    allow_origins=["http://localhost:5173"], 
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],  
+    allow_headers=["*"], 
 )
 
-# Register Routers with Tags
-app.include_router(auth_router, prefix="/api")   # Authentication routes
+app.include_router(auth_router, prefix="/api")   
 app.include_router(users_router, prefix="/api", tags=["Users"])
 app.include_router(courses_router, prefix="/api", tags=["Courses"])
 app.include_router(course_content_router, prefix="/api", tags=["Courses Content"])

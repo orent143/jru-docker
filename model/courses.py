@@ -5,11 +5,10 @@ from typing import List, Dict
 
 router = APIRouter()
 
-# ✅ Schema
 class CourseCreate(BaseModel):
     course_name: str
     section: str
-    user_id: int  # Instructor ID
+    user_id: int  
     class_schedule: str
 
 class CourseResponse(BaseModel):
@@ -17,19 +16,17 @@ class CourseResponse(BaseModel):
     course_name: str
     section: str
     class_schedule: str
-    user_id: int  # ✅ Ensure user_id is included
+    user_id: int  
 
 class CourseUpdate(BaseModel):
     course_name: str
     section: str
     class_schedule: str
 
-# ✅ CREATE (POST)
 @router.post("/courses/", response_model=CourseResponse)
 async def create_course(course: CourseCreate, db=Depends(get_db)):
     cursor, connection = db
     
-    # Ensure user exists
     cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (course.user_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
@@ -48,12 +45,10 @@ async def create_course(course: CourseCreate, db=Depends(get_db)):
         connection.rollback()
         raise HTTPException(status_code=500, detail=f"Error inserting course: {str(e)}")
 
-# ✅ READ ALL (GET)
 @router.get("/courses/", response_model=List[CourseResponse])
 async def read_courses(user_id: int = Query(...), db=Depends(get_db)):
     cursor, _ = db
 
-    # Validate user role
     cursor.execute("SELECT role FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
     if not user:
@@ -69,7 +64,6 @@ async def read_courses(user_id: int = Query(...), db=Depends(get_db)):
     
     return [dict(course) for course in courses]
 
-# ✅ GET STUDENTS IN COURSE
 @router.get("/course_students/{course_id}")
 async def get_students_in_course(course_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -89,7 +83,6 @@ async def get_students_in_course(course_id: int, db=Depends(get_db)):
     
     return {"course_id": course_id, "students": [dict(student) for student in students]}
 
-# ✅ UPDATE (PUT)
 @router.put("/courses/{course_id}")
 async def update_course(course_id: int, course: CourseUpdate, user_id: int, db=Depends(get_db)):
     cursor, connection = db
@@ -107,7 +100,6 @@ async def update_course(course_id: int, course: CourseUpdate, user_id: int, db=D
     connection.commit()
     return {"message": "Course updated successfully"}
 
-# ✅ DELETE (DELETE)
 @router.delete("/courses/{course_id}")
 async def delete_course(course_id: int, user_id: int, db=Depends(get_db)):
     cursor, connection = db
@@ -117,7 +109,6 @@ async def delete_course(course_id: int, user_id: int, db=Depends(get_db)):
     if not existing_course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    # Validate user role
     cursor.execute("SELECT role FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
     if not user:

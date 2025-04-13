@@ -6,10 +6,9 @@ from datetime import datetime
 
 router = APIRouter()
 
-# ✅ Pydantic Models
 class StudentResponse(BaseModel):
     student_id: int
-    user_id: int  # This should be the user_id from the 'students' table
+    user_id: int 
     name: str
     enrollment_date: Optional[str]
     degree: Optional[str] = None
@@ -22,7 +21,6 @@ class CourseAssignRequest(BaseModel):
     student_id: int
 
 
-# ✅ Get all students
 @router.get("/students/")
 async def get_students(db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -32,7 +30,6 @@ async def get_students(db_dep=Depends(get_db)):
     students = db.fetchall()
     return students
 
-# ✅ Get student by ID (linked to users)
 @router.get("/students/{user_id}", response_model=StudentResponse)
 async def get_student(user_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -47,7 +44,6 @@ async def get_student(user_id: int, db_dep=Depends(get_db)):
         if not student:
             raise HTTPException(status_code=404, detail="Student not found")
 
-        # Convert enrollment_date to string
         if student['enrollment_date']:
             student['enrollment_date'] = student['enrollment_date'].strftime("%Y-%m-%d")
 
@@ -55,7 +51,6 @@ async def get_student(user_id: int, db_dep=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
-        # Ensure we fetch any remaining results before closing
         try:
             while db.fetchone():
                 pass
@@ -64,7 +59,6 @@ async def get_student(user_id: int, db_dep=Depends(get_db)):
 
 
 
-# ✅ Delete student
 @router.delete("/students/{student_id}")
 async def delete_student(student_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep

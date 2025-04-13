@@ -11,9 +11,9 @@ db_config = {
 
 def get_db():
     db = mysql.connector.connect(**db_config)
-    cursor = db.cursor(dictionary=True)  # Returns results as dictionaries
+    cursor = db.cursor(dictionary=True)  
     try:
-        yield cursor, db  # Yield both cursor and connection
+        yield cursor, db  
     finally:
         cursor.close()
         db.close()

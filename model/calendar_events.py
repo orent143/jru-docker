@@ -22,23 +22,19 @@ class EventUpdate(BaseModel):
     type: Optional[str] = None
     course_id: Optional[int] = None
 
-# Create a new event
 @router.post("/events/")
 async def create_event(event: EventCreate, db=Depends(get_db)):
     cursor, connection = db
     
-    # Check if user exists
     cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (event.user_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Check if course exists if course_id is provided
     if event.course_id:
         cursor.execute("SELECT course_id FROM courses WHERE course_id = %s", (event.course_id,))
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail="Course not found")
     
-    # Insert the event
     query = """
     INSERT INTO calendar_events (title, date, time, description, type, user_id, course_id)
     VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -54,10 +50,8 @@ async def create_event(event: EventCreate, db=Depends(get_db)):
     ))
     connection.commit()
     
-    # Get the ID of the newly created event
     event_id = cursor.lastrowid
     
-    # Return the created event
     return {
         "event_id": event_id,
         "title": event.title,
@@ -69,7 +63,6 @@ async def create_event(event: EventCreate, db=Depends(get_db)):
         "course_id": event.course_id
     }
 
-# Get all events
 @router.get("/events/")
 async def get_events(db=Depends(get_db)):
     cursor, _ = db
@@ -100,12 +93,10 @@ async def get_events(db=Depends(get_db)):
         for event in events
     ]
 
-# Get events by user ID
 @router.get("/events/user/{user_id}")
 async def get_user_events(user_id: int, db=Depends(get_db)):
     cursor, _ = db
     
-    # Check if user exists
     cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
@@ -138,7 +129,6 @@ async def get_user_events(user_id: int, db=Depends(get_db)):
         for event in events
     ]
 
-# Get a specific event
 @router.get("/events/{event_id}")
 async def get_event(event_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -169,23 +159,19 @@ async def get_event(event_id: int, db=Depends(get_db)):
         "course_name": event["course_name"]
     }
 
-# Update an event
 @router.put("/events/{event_id}")
 async def update_event(event_id: int, event_update: EventUpdate, db=Depends(get_db)):
     cursor, connection = db
     
-    # Check if event exists
     cursor.execute("SELECT event_id FROM calendar_events WHERE event_id = %s", (event_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Event not found")
     
-    # Check if course exists if course_id is provided
     if event_update.course_id is not None:
         cursor.execute("SELECT course_id FROM courses WHERE course_id = %s", (event_update.course_id,))
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail="Course not found")
     
-    # Build the update query dynamically based on provided fields
     update_fields = []
     params = []
     
@@ -216,10 +202,8 @@ async def update_event(event_id: int, event_update: EventUpdate, db=Depends(get_
     if not update_fields:
         return {"message": "No fields to update"}
     
-    # Add the event_id to the params
     params.append(event_id)
     
-    # Construct and execute the update query
     query = f"""
     UPDATE calendar_events
     SET {', '.join(update_fields)}
@@ -230,29 +214,24 @@ async def update_event(event_id: int, event_update: EventUpdate, db=Depends(get_
     
     return {"message": "Event updated successfully"}
 
-# Delete an event
 @router.delete("/events/{event_id}")
 async def delete_event(event_id: int, db=Depends(get_db)):
     cursor, connection = db
     
-    # Check if event exists
     cursor.execute("SELECT event_id FROM calendar_events WHERE event_id = %s", (event_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Event not found")
     
-    # Delete the event
     query = "DELETE FROM calendar_events WHERE event_id = %s"
     cursor.execute(query, (event_id,))
     connection.commit()
     
     return {"message": "Event deleted successfully"}
 
-# Get events by course ID
 @router.get("/events/course/{course_id}")
 async def get_course_events(course_id: int, db=Depends(get_db)):
     cursor, _ = db
     
-    # Check if course exists
     cursor.execute("SELECT course_id FROM courses WHERE course_id = %s", (course_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Course not found")
@@ -269,7 +248,6 @@ async def get_course_events(course_id: int, db=Depends(get_db)):
     cursor.execute(query, (course_id,))
     events = cursor.fetchall()
     
-    # Return empty list if no events are found for this course
     if not events:
         return []
     

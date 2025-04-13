@@ -4,25 +4,23 @@ from .db import get_db
 
 router = APIRouter()
 
-# ✅ Pydantic Models
 class CourseResponse(BaseModel):
     course_id: int
     course_name: str
     section: str
     class_schedule: str
 
-from typing import Optional  # ✅ Add this import
+from typing import Optional  
 
 
 class InstructorResponse(BaseModel):
     instructor_id: int
-    user_id: Optional[int]  # Allow None values
+    user_id: Optional[int]  
     name: str
     hire_date: Optional[str]
     department: Optional[str]
     courses: list["CourseResponse"]
 
-# ✅ Get all instructors
 @router.get("/instructors/")
 async def get_instructors(db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -34,19 +32,16 @@ async def get_instructors(db_dep=Depends(get_db)):
 
     return instructors
 
-# ✅ Get instructor with courses
 @router.get("/instructors/{instructor_id}", response_model=InstructorResponse)
 async def get_instructor(instructor_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Fetch instructor details
     db.execute("SELECT instructor_id, user_id, name, hire_date, department FROM instructors WHERE instructor_id = %s", (instructor_id,))
     instructor = db.fetchone()
     
     if not instructor:
         raise HTTPException(status_code=404, detail="Instructor not found")
 
-    # Fetch courses linked to the user_id (not instructor_id)
     db.execute("""
         SELECT course_id, course_name, section, class_schedule, user_id
         FROM courses
@@ -60,7 +55,7 @@ async def get_instructor(instructor_id: int, db_dep=Depends(get_db)):
         "name": instructor["name"],
         "hire_date": str(instructor["hire_date"]) if instructor["hire_date"] else None,
         "department": instructor["department"],
-        "courses": courses  # ✅ Now courses are linked to user_id
+        "courses": courses  
     }
 
 

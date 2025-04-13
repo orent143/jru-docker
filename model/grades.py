@@ -5,30 +5,26 @@ from enum import Enum
 
 router = APIRouter()
 
-# Enum for Semester
 class Semester(str, Enum):
     first = '1st'
     second = '2nd'
 
-# Updated GradeCreate to include all terms and the overall grade
 class GradeCreate(BaseModel):
     student_id: int
     course_id: int
-    prelim_grade: float = None  # Optional, for Prelim term
-    midterm_grade: float = None  # Optional, for Midterm term
-    finals_grade: float = None  # Optional, for Finals term
+    prelim_grade: float = None  
+    midterm_grade: float = None  
+    finals_grade: float = None 
     school_year: str
-    semester: str  # '1st' or '2nd'
+    semester: str  
 
-# GradeUpdate now supports all terms and overall grade
 class GradeUpdate(BaseModel):
-    prelim_grade: float = None  # Optional for Prelim term
-    midterm_grade: float = None  # Optional for Midterm term
-    finals_grade: float = None  # Optional for Finals term
+    prelim_grade: float = None  
+    midterm_grade: float = None  
+    finals_grade: float = None  
     school_year: str
     semester: str
 
-# Assign grade (create a grade record)
 @router.post("/grades/")
 async def assign_grade(grade: GradeCreate, db=Depends(get_db)):
     cursor, connection = db
@@ -56,7 +52,6 @@ async def assign_grade(grade: GradeCreate, db=Depends(get_db)):
     return {"message": "Grade assigned successfully"}
 
 def calculate_overall_grade(prelim: float, midterm: float, finals: float) -> float:
-    # Example of a simple averaging of grades; modify based on your grading policy
     total = 0
     count = 0
     if prelim is not None:
@@ -70,7 +65,6 @@ def calculate_overall_grade(prelim: float, midterm: float, finals: float) -> flo
         count += 1
     return total / count if count > 0 else 0
 
-# Get grades by course ID
 @router.get("/courses/{course_id}/grades")
 async def get_course_grades(course_id: int, db=Depends(get_db)):
     cursor, connection = db
@@ -99,7 +93,6 @@ async def get_course_grades(course_id: int, db=Depends(get_db)):
     ]
     return grades
 
-# Update grade for a specific student and course
 @router.put("/grades/{student_id}/{course_id}")
 async def update_grade(student_id: int, course_id: int, grade_update: GradeUpdate, db=Depends(get_db)):
     cursor, connection = db
@@ -127,7 +120,6 @@ async def update_grade(student_id: int, course_id: int, grade_update: GradeUpdat
 
     return {"message": "Grade updated successfully"}
 
-# Delete grade
 @router.delete("/grades/{grade_id}")
 async def delete_grade(grade_id: int, db=Depends(get_db)):
     connection, cursor = db
@@ -143,18 +135,15 @@ async def delete_grade(grade_id: int, db=Depends(get_db)):
 
     return {"message": "Grade deleted successfully"}
 
-# Get grades by student ID (across all courses)
 @router.get("/student/{student_id}/grades")
 async def get_student_grades(student_id: int, db=Depends(get_db)):
     cursor, connection = db
     
     try:
-        # First get the student's degree
         cursor.execute("SELECT degree FROM students WHERE user_id = %s", (student_id,))
         student_result = cursor.fetchone()
         student_degree = student_result["degree"] if student_result else None
         
-        # Then get the grades
         query = """
             SELECT g.grade_id, g.student_id, g.course_id, c.course_name as course_title, 
                    g.prelim_grade, g.midterm_grade, g.finals_grade, 
@@ -190,7 +179,6 @@ async def get_student_grades(student_id: int, db=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
-        # Ensure we fetch any remaining results before closing
         try:
             while cursor.fetchone():
                 pass

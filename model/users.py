@@ -3,12 +3,11 @@ from pydantic import BaseModel, EmailStr, model_validator
 from typing import List, Optional
 from .db import get_db
 from sqlalchemy.orm import Session
-from .utils import get_current_user, pwd_context  # Importing pwd_context for hashing passwords
+from .utils import get_current_user, pwd_context  
 from enum import Enum
 
 router = APIRouter()
 
-# Pydantic Models
 class UserRole(str, Enum):
     student = "student"
     faculty = "faculty"
@@ -20,7 +19,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str 
     role: UserRole
-    degree: Optional[str] = None  # Required if role is student
+    degree: Optional[str] = None 
 
     @model_validator(mode="after")
     def check_degree_for_student(self):
@@ -33,8 +32,7 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
     role: Optional[UserRole] = None
-    degree: Optional[str] = None  # 👈 Add this
-
+    degree: Optional[str] = None 
 
 class UserResponse(BaseModel):
     user_id: int
@@ -42,8 +40,7 @@ class UserResponse(BaseModel):
     email: str
     role: str
     created_at: str
-    degree: Optional[str] = None  # Only filled if student
-
+    degree: Optional[str] = None 
 class PasswordUpdate(BaseModel):
     user_id: int
     new_password: str
@@ -55,7 +52,6 @@ async def protected_route(current_user: dict = Depends(get_current_user)):
     """
     return {"message": f"Hello, {current_user['sub']}"}
 
-# 🚀 Get all users (READ)
 @router.get("/users/", response_model=List[UserResponse])
 async def get_users(db_dep=Depends(get_db)):
     db, conn = db_dep  
@@ -83,12 +79,11 @@ async def get_users(db_dep=Depends(get_db)):
             "email": user["email"],
             "role": user["role"],
             "created_at": str(user["created_at"]),
-            "degree": user["degree"]  # Will be NULL for non-students
+            "degree": user["degree"] 
         }
         for user in users
     ]
 
-# 🚀 Get a single user by ID (READ)
 @router.get("/users/{user_id}", response_model=UserResponse)
 async def get_user(user_id: int, db=Depends(get_db)):
     query = "SELECT user_id, name, email, role, created_at FROM users WHERE user_id = %s"
@@ -106,20 +101,16 @@ async def get_user(user_id: int, db=Depends(get_db)):
     
     raise HTTPException(status_code=404, detail="User not found")
 
-# 🚀 Create a new user (CREATE)
 @router.post("/users/", response_model=UserResponse)
 async def create_user(user: UserCreate, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the email already exists
     db.execute("SELECT user_id FROM users WHERE email = %s", (user.email,))
     if db.fetchone():
         raise HTTPException(status_code=400, detail="Email is already registered.")
     
-    # Hash the password
     hashed_password = pwd_context.hash(user.password)
 
-    # Insert User
     query = "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)"
     values = (user.name, user.email, hashed_password, user.role.value)
 
@@ -128,7 +119,6 @@ async def create_user(user: UserCreate, db_dep=Depends(get_db)):
         conn.commit()
         user_id = db.lastrowid  
 
-        # Auto-add students to students table
         if user.role == UserRole.student:
             first_name, last_name = user.name.split()[0], user.name.split()[-1] if " " in user.name else ""
             db.execute("INSERT INTO students (user_id, student_number, first_name, last_name, degree) VALUES (%s, %s, %s, %s, %s)", 
@@ -151,7 +141,6 @@ async def create_user(user: UserCreate, db_dep=Depends(get_db)):
 async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_db)):
     db, conn = db_dep  
 
-    # Check if user exists and get current role
     db.execute("SELECT user_id, role FROM users WHERE user_id = %s", (user_id,))
     existing_user = db.fetchone()
     if not existing_user:
@@ -163,7 +152,6 @@ async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided for update")
 
-    # Update users table
     user_fields = {k: v for k, v in update_data.items() if k in ["name", "email", "password", "role"]}
     if "password" in user_fields:
         user_fields["password"] = pwd_context.hash(user_fields["password"])
@@ -173,7 +161,6 @@ async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_
         values = list(user_fields.values()) + [user_id]
         db.execute(f"UPDATE users SET {set_clause} WHERE user_id = %s", values)
 
-    # If role is (or becomes) student, update students table
     role_is_student = update_data.get("role", current_role) == UserRole.student
 
     if role_is_student:
@@ -186,24 +173,20 @@ async def update_user(user_id: int, user_update: UserUpdate, db_dep=Depends(get_
                 ON DUPLICATE KEY UPDATE first_name = VALUES(first_name), last_name = VALUES(last_name)
             """, (user_id, f"SN{user_id:06d}", first_name, last_name, update_data.get("degree", "")))
         elif "degree" in update_data:
-            # Only update degree if name is not updated
             db.execute("UPDATE students SET degree = %s WHERE user_id = %s", (update_data["degree"], user_id))
 
     conn.commit()
     return {"message": "User updated successfully"}
 
-# 🚀 Delete a user (DELETE)
 @router.delete("/users/{user_id}")
 async def delete_user(user_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if user exists before deleting
     db.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
-        # Delete from students if they exist
         db.execute("DELETE FROM students WHERE user_id = %s", (user_id,))
         db.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
         conn.commit()
@@ -217,16 +200,13 @@ async def delete_user(user_id: int, db_dep=Depends(get_db)):
 async def update_password(password_update: PasswordUpdate, db_dep=Depends(get_db)):
     db, conn = db_dep
     
-    # Check if user exists
     db.execute("SELECT user_id FROM users WHERE user_id = %s", (password_update.user_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Hash the new password
     hashed_password = pwd_context.hash(password_update.new_password)
     
     try:
-        # Update the password
         query = "UPDATE users SET password = %s WHERE user_id = %s"
         db.execute(query, (hashed_password, password_update.user_id))
         conn.commit()

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Form, File, UploadFile
 from pydantic import BaseModel
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import os
 import uuid
 from .db import get_db
@@ -13,9 +13,8 @@ router = APIRouter()
 class QuizSubmission(BaseModel):
     student_id: int
     quiz_id: int
-    file_path: str = None  # File data or external link
-    external_link: str = None
-    submission_text: str = None  # Optional text submission
+    file_path: str = None  
+    submission_text: str = None  
 
 class StudentQuiz(BaseModel):
     student_id: int
@@ -23,34 +22,57 @@ class StudentQuiz(BaseModel):
     title: str
     description: str
     quiz_date: str
-    external_link: str = None
+    file_path: str = None
 
 class QuizFeedback(BaseModel):
-    grade: float  # The grade (can be a float or an integer)
-    feedback: str = None  # Optional feedback
+    grade: float  
+    feedback: str = None  
     
-# ✅ Create a Quiz for a Course
 @router.post("/quizzes/")
-async def create_quiz(quiz: StudentQuiz, db_dep=Depends(get_db)):
+async def create_quiz(
+    course_id: int = Form(...),
+    title: str = Form(...),
+    description: str = Form(...),
+    quiz_date: str = Form(...),
+    file: UploadFile = File(None),
+    external_link: str = Form(None),
+    db_dep=Depends(get_db)
+):
     db, conn = db_dep
 
-    db.execute("SELECT course_name FROM courses WHERE course_id = %s", (quiz.course_id,))
+    db.execute("SELECT course_name FROM courses WHERE course_id = %s", (course_id,))
     course = db.fetchone()
     if not course:
         raise HTTPException(status_code=400, detail="Course not found")
     
+    file_path = None
+    if file and file.filename:
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        try:
+            with open(file_path, "wb") as f:
+                f.write(await file.read())
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    elif external_link:
+        file_path = external_link  # Store external link directly in file_path
+    
     query = """
-        INSERT INTO quizzes (course_id, title, description, quiz_date, external_link)
+        INSERT INTO quizzes (course_id, title, description, quiz_date, file_path)
         VALUES (%s, %s, %s, %s, %s)
         RETURNING quiz_id
     """
-    db.execute(query, (quiz.course_id, quiz.title, quiz.description, quiz.quiz_date, quiz.external_link))
+    db.execute(query, (course_id, title, description, quiz_date, file_path))
     quiz_id = db.fetchone()["quiz_id"]
     conn.commit()
 
-    return {"message": "Quiz created successfully", "quiz_id": quiz_id, "course_name": course["course_name"]}
+    return {
+        "message": "Quiz created successfully", 
+        "quiz_id": quiz_id, 
+        "course_name": course["course_name"],
+        "file_path": file_path
+    }
 
-# ✅ Get Quizzes for a Course
 @router.get("/quizzes/{course_id}")
 async def get_course_quizzes(course_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -61,7 +83,7 @@ async def get_course_quizzes(course_id: int, db_dep=Depends(get_db)):
         raise HTTPException(status_code=404, detail="Course not found")
 
     query = """
-        SELECT quiz_id, title, description, quiz_date, external_link 
+        SELECT quiz_id, title, description, quiz_date, file_path 
         FROM quizzes
         WHERE course_id = %s ORDER BY quiz_date ASC
     """
@@ -70,7 +92,6 @@ async def get_course_quizzes(course_id: int, db_dep=Depends(get_db)):
 
     return {"course_id": course_id, "course_name": course["course_name"], "quizzes": quizzes}
 
-# ✅ Get Quizzes for a Specific Student
 @router.get("/student_quizzes/{student_id}/{course_id}")
 async def get_student_quizzes(student_id: int, course_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
@@ -85,7 +106,7 @@ async def get_student_quizzes(student_id: int, course_id: int, db_dep=Depends(ge
         raise HTTPException(status_code=404, detail="Course not found")
 
     query = """
-        SELECT quiz_id, title, description, quiz_date, external_link
+        SELECT quiz_id, title, description, quiz_date, file_path
         FROM quizzes
         WHERE course_id = %s
         ORDER BY quiz_date ASC
@@ -100,21 +121,19 @@ async def get_student_quizzes(student_id: int, course_id: int, db_dep=Depends(ge
         "quizzes": quizzes
     }
 
-# ✅ Submit a Quiz
 @router.post("/submit-quiz/")
 async def submit_quiz(
-    student_id: int = Form(...),  # Expecting Form data for student_id
-    quiz_id: int = Form(...),     # Expecting Form data for quiz_id
-    file: UploadFile = File(None),  # Optional file data sent as multipart form data
-    external_link: str = Form(None),  # External link submitted via Form data
-    submission_text: str = Form(None),  # Optional text submission
-    db_dep=Depends(get_db)  # Inject the db dependency
+    student_id: int = Form(...), 
+    quiz_id: int = Form(...),    
+    file: UploadFile = File(None),  
+    external_link: str = Form(None),  
+    submission_text: str = Form(None), 
+    db_dep=Depends(get_db) 
 ):
     """Handle quiz submission."""
     db, conn = db_dep
     file_path = None
 
-    # Process file upload if provided
     if file and file.filename:
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
@@ -124,38 +143,45 @@ async def submit_quiz(
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-    # If external link provided, use it
     elif external_link:
-        file_path = external_link
+        file_path = external_link  # Store external link directly in file_path
 
-    # Ensure either file or external link is provided
-    if not file_path:
-        raise HTTPException(status_code=400, detail="Either a file or an external link must be provided")
+    if not file_path and not submission_text:
+        raise HTTPException(status_code=400, detail="Either a file/link or submission text must be provided")
 
-    # Check if the quiz exists
+    # Check if quiz exists and store result
     db.execute("SELECT * FROM quizzes WHERE quiz_id = %s", (quiz_id,))
-    if not db.fetchone():
+    quiz = db.fetchone()
+    if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
 
-    # Check if the student is enrolled in the course
+    # Check if student is enrolled and store result
     db.execute("SELECT * FROM student_courses WHERE student_id = %s", (student_id,))
-    if not db.fetchone():
+    enrollment = db.fetchall()  # Fetch all records to ensure cursor is cleared
+    if not enrollment:
         raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
 
-    # Insert quiz submission into the database
+    # Check if the student has already submitted this quiz
+    db.execute("SELECT submission_id FROM quiz_submissions WHERE quiz_id = %s AND student_id = %s", (quiz_id, student_id))
+    existing_submission = db.fetchone()
+    if existing_submission:
+        # Delete the existing submission if it exists
+        db.execute("DELETE FROM quiz_submissions WHERE submission_id = %s", (existing_submission["submission_id"],))
+        conn.commit()
+
     query = """
-        INSERT INTO quiz_submissions (quiz_id, student_id, file_path, external_link, submission_text)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO quiz_submissions (quiz_id, student_id, file_path, submission_text)
+        VALUES (%s, %s, %s, %s)
     """
     try:
-        db.execute(query, (quiz_id, student_id, file_path, external_link, submission_text))
+        db.execute(query, (quiz_id, student_id, file_path, submission_text))
         conn.commit()
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     return JSONResponse(
-        content={"message": "Quiz submitted successfully", "file_path": file_path, "external_link": external_link}, 
+        content={"message": "Quiz submitted successfully", "file_path": file_path}, 
         status_code=200
     )
 
@@ -163,13 +189,11 @@ async def submit_quiz(
 async def get_student_quiz_submissions(student_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the student exists
     db.execute("SELECT * FROM students WHERE student_id = %s", (student_id,))
     student = db.fetchone()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # Get all quiz submissions for the student
     db.execute("""
         SELECT qs.quiz_id, q.title, qs.file_path, qs.submission_text, qs.submitted_at
         FROM quiz_submissions qs
@@ -179,7 +203,6 @@ async def get_student_quiz_submissions(student_id: int, db_dep=Depends(get_db)):
     """, (student_id,))
     submissions = db.fetchall()
 
-    # If no submissions found
     if not submissions:
         raise HTTPException(status_code=404, detail="No quiz submissions found for this student")
 
@@ -190,16 +213,15 @@ async def get_student_quiz_submissions(student_id: int, db_dep=Depends(get_db)):
 
 @router.get("/quiz_submissions/{quiz_id}")
 async def get_submitted_quizzes(quiz_id: int, db_dep=Depends(get_db)):
-    db, conn = db_dep  # Unpack the tuple returned by get_db()
+    db, conn = db_dep  
 
-    # Check if the quiz exists
     db.execute("SELECT * FROM quizzes WHERE quiz_id = %s", (quiz_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Quiz not found")
 
     query = """
         SELECT qs.submission_id, qs.quiz_id, qs.student_id, u.name AS student_name, 
-               qs.submitted_at, qs.file_path, qs.external_link, qs.submission_text,
+               qs.submitted_at, qs.file_path, qs.submission_text,
                qs.grade, qs.feedback
         FROM quiz_submissions qs
         JOIN users u ON qs.student_id = u.user_id
@@ -209,7 +231,6 @@ async def get_submitted_quizzes(quiz_id: int, db_dep=Depends(get_db)):
     db.execute(query, (quiz_id,))
     submissions = db.fetchall()
 
-    # If no submissions found
     if not submissions:
         raise HTTPException(status_code=404, detail="No submissions found for this quiz")
 
@@ -224,7 +245,7 @@ async def get_quiz_submission(submission_id: int, db_dep=Depends(get_db)):
 
     query = """
         SELECT qs.submission_id, qs.quiz_id, qs.student_id, u.name AS student_name,
-               qs.file_path, qs.external_link, qs.submission_text, qs.submitted_at,
+               qs.file_path, qs.submission_text, qs.submitted_at,
                qs.grade, qs.feedback
         FROM quiz_submissions qs
         JOIN users u ON qs.student_id = u.user_id
@@ -241,25 +262,24 @@ async def get_quiz_submission(submission_id: int, db_dep=Depends(get_db)):
 @router.put("/quiz-submission/{submission_id}/grade")
 async def update_quiz_submission_grade(
     submission_id: int,
-    feedback: QuizFeedback,
+    grade: float = Form(...),
+    feedback: str = Form(None),
     db_dep=Depends(get_db)
 ):
     db, conn = db_dep
 
-    # Check if the submission exists
     db.execute("SELECT * FROM quiz_submissions WHERE submission_id = %s", (submission_id,))
     submission = db.fetchone()
     if not submission:
         raise HTTPException(status_code=404, detail="Quiz submission not found")
 
-    # Update the grade and feedback
     query = """
         UPDATE quiz_submissions
         SET grade = %s, feedback = %s
         WHERE submission_id = %s
     """
     try:
-        db.execute(query, (feedback.grade, feedback.feedback, submission_id))
+        db.execute(query, (grade, feedback, submission_id))
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -274,17 +294,14 @@ async def update_quiz_submission_grade(
 async def get_quiz_submission_id(quiz_id: int, student_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the quiz exists
     db.execute("SELECT * FROM quizzes WHERE quiz_id = %s", (quiz_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Quiz not found")
 
-    # Check if the student exists
     db.execute("SELECT * FROM users WHERE user_id = %s", (student_id,))
     if not db.fetchone():
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # Get the submission ID
     query = """
         SELECT submission_id
         FROM quiz_submissions
@@ -302,13 +319,11 @@ async def get_quiz_submission_id(quiz_id: int, student_id: int, db_dep=Depends(g
 async def delete_quiz_submission(submission_id: int, db_dep=Depends(get_db)):
     db, conn = db_dep
 
-    # Check if the submission exists
     db.execute("SELECT * FROM quiz_submissions WHERE submission_id = %s", (submission_id,))
     submission = db.fetchone()
     if not submission:
         raise HTTPException(status_code=404, detail="Quiz submission not found")
 
-    # Delete the submission
     query = "DELETE FROM quiz_submissions WHERE submission_id = %s"
     try:
         db.execute(query, (submission_id,))
@@ -321,3 +336,13 @@ async def delete_quiz_submission(submission_id: int, db_dep=Depends(get_db)):
         content={"message": "Quiz submission deleted successfully"},
         status_code=200
     )
+
+@router.get("/quizzes/download/{file_name}")
+async def download_quiz_file(file_name: str):
+    file_name = os.path.basename(file_name)  
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+
+    if os.path.exists(file_path):
+        return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
+    
+    raise HTTPException(status_code=404, detail="File not found")

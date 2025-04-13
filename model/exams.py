@@ -1,5 +1,4 @@
 from fastapi import Depends, HTTPException, APIRouter, Form, File, UploadFile, FastAPI
-from pydantic import BaseModel
 import os
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,31 +6,12 @@ from .db import get_db
 
 router = APIRouter()
 
-# Directory for uploaded files
 UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure the directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)  
 
-# Serve static files (uploaded files) in the 'uploads' directory
-app = FastAPI()  # FastAPI app is created here
+app = FastAPI()  
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
-# ✅ Schema
-class ExamCreate(BaseModel):
-    course_id: int
-    title: str
-    description: str
-    exam_date: str
-    duration_minutes: int
-    external_link: str = None  # Optionally accept an external link
-
-class ExamUpdate(BaseModel):
-    title: str
-    description: str
-    exam_date: str
-    duration_minutes: int
-    external_link: str = None  # Optionally accept an external link
-
-# ✅ Create Exam
 @router.post("/exams")
 async def create_exam(
     course_id: int = Form(...),
@@ -40,12 +20,13 @@ async def create_exam(
     exam_date: str = Form(...),
     duration_minutes: int = Form(...),
     file: UploadFile = File(None),
-    external_link: str = Form(None),  # Accept external link
+    external_link: str = Form(None),  
     db=Depends(get_db)
 ):
     cursor, connection = db
 
-    # Ensure course exists
+    exam_date = exam_date.split("T")[0]
+    
     cursor.execute("SELECT user_id FROM courses WHERE course_id = %s", (course_id,))
     course = cursor.fetchone()
     if not course:
@@ -53,24 +34,20 @@ async def create_exam(
 
     user_id = course["user_id"]
 
-    # Handle file upload if no external link is provided
-    file_url = None
-    if file:
+    file_path = None
+    if file and file.filename:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(file.file.read())
 
-        # Store relative path for the file
-        file_url = f"/uploads/{file.filename}"
+        file_path = f"/uploads/{file.filename}"
     elif external_link:
-        # If an external link is provided, use it instead of file upload
-        file_url = external_link
+        file_path = external_link
 
-    # Insert exam record into the database
     query = """INSERT INTO exams (course_id, title, description, exam_date, duration_minutes, file_path, user_id) 
                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-    cursor.execute(query, (course_id, title, description, exam_date, duration_minutes, file_url, user_id))
+    cursor.execute(query, (course_id, title, description, exam_date, duration_minutes, file_path, user_id))
     connection.commit()
 
     exam_id = cursor.lastrowid
@@ -80,15 +57,15 @@ async def create_exam(
         "description": description,
         "exam_date": exam_date,
         "duration_minutes": duration_minutes,
-        "file_path": file_url,  # Return file URL (either local or external)
+        "file_path": file_path, 
         "user_id": user_id
     }
 
-# ✅ Get Exams for a Course
 @router.get("/exams/exams/{course_id}")
 async def get_exams(course_id: int, db=Depends(get_db)):
     cursor, _ = db
 
+    
     cursor.execute("SELECT course_name FROM courses WHERE course_id = %s", (course_id,))
     course = cursor.fetchone()
     if not course:
@@ -112,16 +89,15 @@ async def get_exams(course_id: int, db=Depends(get_db)):
                 "exam_id": e["exam_id"],
                 "title": e["title"],
                 "description": e["description"],
-                "exam_date": e["exam_date"],
+                "exam_date": str(e["exam_date"]).split(" ")[0],
                 "duration_minutes": e["duration_minutes"],
-                "file_path": e["file_path"],  # Return the file path (either local or external)
+                "file_path": e["file_path"],  
                 "instructor_name": e["instructor_name"]
             }
             for e in exams
         ]
     }
 
-# ✅ Get Single Exam (with file download link)
 @router.get("/exams/item/{exam_id}")
 async def get_exam(exam_id: int, db=Depends(get_db)):
     cursor, _ = db
@@ -132,41 +108,79 @@ async def get_exam(exam_id: int, db=Depends(get_db)):
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
 
-    file_url = exam["file_path"] if exam["file_path"] else None
-
     return {
         "exam_id": exam["exam_id"],
         "title": exam["title"],
         "description": exam["description"],
-        "exam_date": exam["exam_date"],
+        "exam_date": str(exam["exam_date"]).split(" ")[0],
         "duration_minutes": exam["duration_minutes"],
-        "file_path": file_url
+        "file_path": exam["file_path"]
     }
+
 @router.get("/exams/download/{file_name}")
 async def download_file(file_name: str):
-    file_name = os.path.basename(file_name)  # To avoid directory traversal attacks
+    file_name = os.path.basename(file_name)  
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
-    # Check if the file exists in the uploads directory
     if os.path.exists(file_path):
         return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
     
     raise HTTPException(status_code=404, detail="File not found")
 
-# ✅ Update Exam
 @router.put("/exams/{exam_id}")
-async def update_exam(exam_id: int, exam: ExamUpdate, db=Depends(get_db)):
+async def update_exam(
+    exam_id: int,
+    title: str = Form(...),
+    description: str = Form(...),
+    exam_date: str = Form(...),
+    duration_minutes: int = Form(...),
+    file: UploadFile = File(None),
+    external_link: str = Form(None),
+    db=Depends(get_db)
+):
     cursor, connection = db
+    
+    # Check if exam exists
+    cursor.execute("SELECT * FROM exams WHERE exam_id = %s", (exam_id,))
+    existing_exam = cursor.fetchone()
+    if not existing_exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    
+    exam_date = exam_date.split("T")[0]
+    
+    # Handle file upload or external link
+    file_path = existing_exam["file_path"]  # Default to existing file path
+    
+    if file and file.filename:
+        # Upload new file
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        with open(file_path, "wb") as buffer:
+            buffer.write(file.file.read())
+        file_path = f"/uploads/{file.filename}"
+    elif external_link:
+        # Use external link
+        file_path = external_link
+    
     query = """UPDATE exams 
                SET title = %s, description = %s, exam_date = %s, duration_minutes = %s, file_path = %s 
                WHERE exam_id = %s"""
-    cursor.execute(query, (exam.title, exam.description, exam.exam_date, exam.duration_minutes, exam.external_link, exam_id))
+    cursor.execute(query, (title, description, exam_date, duration_minutes, file_path, exam_id))
     connection.commit()
+
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Exam not found")
-    return {"message": "Exam updated successfully"}
+    
+    return {
+        "message": "Exam updated successfully",
+        "exam_id": exam_id,
+        "title": title,
+        "description": description,
+        "exam_date": exam_date,
+        "duration_minutes": duration_minutes,
+        "file_path": file_path
+    }
 
-# ✅ Delete Exam
 @router.delete("/exams/{exam_id}")
 async def delete_exam(exam_id: int, db=Depends(get_db)):
     cursor, connection = db
