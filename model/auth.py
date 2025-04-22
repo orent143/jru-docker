@@ -1,7 +1,6 @@
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from .db import get_db  # Import database dependency
+from .db import get_db  
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from datetime import datetime, timedelta
 import random
@@ -12,10 +11,8 @@ from enum import Enum
 from passlib.exc import UnknownHashError
 
 
-# JWT and password hashing utilities
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Helper function to create access tokens
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -96,24 +93,6 @@ async def login_user(login_data: LoginRequest, db_dep=Depends(get_db)):
     courses = cursor.fetchall()
 
     course_list = [CourseResponse(**course) for course in courses]
-
-    verification_code = random.randint(100000, 999999)
-    verification_codes[user["email"]] = {
-        "code": verification_code,
-        "expires_at": datetime.utcnow() + timedelta(minutes=5)
-    }
-
-    message = MessageSchema(
-        subject="Your Verification Code",
-        recipients=[user["email"]],
-        body=f"Your verification code is: {verification_code}",
-        subtype="plain"
-    )
-
-    try:
-        await fm.send_message(message)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
     return {
         "user_id": user["user_id"],

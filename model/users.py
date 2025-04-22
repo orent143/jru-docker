@@ -54,36 +54,47 @@ async def protected_route(current_user: dict = Depends(get_current_user)):
 
 @router.get("/users/", response_model=List[UserResponse])
 async def get_users(db_dep=Depends(get_db)):
-    db, conn = db_dep  
-    query = """
-        SELECT 
-            u.user_id, 
-            u.name, 
-            u.email, 
-            u.role, 
-            u.created_at, 
-            CASE 
-                WHEN u.role = 'student' THEN s.degree 
-                ELSE NULL 
-            END AS degree
-        FROM users u
-        LEFT JOIN students s ON u.user_id = s.user_id
-    """
-    db.execute(query)
-    users = db.fetchall()
+    cursor = None
+    try:
+        db, conn = db_dep
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT 
+                u.user_id, 
+                u.name, 
+                u.email, 
+                u.role, 
+                u.created_at, 
+                CASE 
+                    WHEN u.role = 'student' THEN s.degree 
+                    ELSE NULL 
+                END AS degree
+            FROM users u
+            LEFT JOIN students s ON u.user_id = s.user_id
+        """
+        cursor.execute(query)
+        users = cursor.fetchall()
 
-    return [
-        {
-            "user_id": user["user_id"],
-            "name": user["name"],
-            "email": user["email"],
-            "role": user["role"],
-            "created_at": str(user["created_at"]),
-            "degree": user["degree"] 
-        }
-        for user in users
-    ]
+        return [
+            {
+                "user_id": user["user_id"],
+                "name": user["name"],
+                "email": user["email"],
+                "role": user["role"],
+                "created_at": str(user["created_at"]),
+                "degree": user["degree"]
+            }
+            for user in users
+        ] if users else []
 
+    except Exception as e:
+        print(f"Database error: {str(e)}")  # Add logging
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        if cursor:
+            cursor.close()
+            
 @router.get("/users/{user_id}", response_model=UserResponse)
 async def get_user(user_id: int, db=Depends(get_db)):
     query = "SELECT user_id, name, email, role, created_at FROM users WHERE user_id = %s"

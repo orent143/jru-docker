@@ -296,3 +296,24 @@ async def get_assignment_submission(submission_id: int, db_dep=Depends(get_db)):
                 pass
         except:
             pass
+
+@router.get("/download/{file_name:path}")
+async def download_assignment_file(file_name: str):
+    """Download assignment files similar to quiz files."""
+    # Handle the case where the frontend includes 'uploads/' in the file path
+    if file_name.startswith("uploads/"):
+        file_name = file_name.replace("uploads/", "", 1)
+    
+    # Make sure we only use the basename for security
+    file_name = os.path.basename(file_name)
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail=f"File not found: {file_name}")
+    
+    # Set content disposition to force download
+    return FileResponse(
+        path=file_path, 
+        filename=file_name,
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+    )

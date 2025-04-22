@@ -234,7 +234,7 @@ async def get_course_events(course_id: int, db=Depends(get_db)):
     
     cursor.execute("SELECT course_id FROM courses WHERE course_id = %s", (course_id,))
     if not cursor.fetchone():
-        raise HTTPException(status_code=404, detail="Course not found")
+        return []
     
     query = """
     SELECT e.event_id, e.title, e.date, e.time, e.description, e.type, e.user_id, e.course_id, 

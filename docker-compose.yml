@@ -1,0 +1,39 @@
+services:
+  web:
+    build: .
+    container_name: fastapi_web
+    ports:
+      - "8001:8000"  # Map container port 8000 to host port 8001
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db  # Changed from localhost to db (service name)
+      DB_USER: root
+      DB_PASSWORD: yourpassword
+      DB_NAME: jru_system
+      DB_PORT: 3306  # Inside Docker network, use default MySQL port
+    networks:
+      - jrunet
+    volumes:
+      - .:/app  # Mount current directory for development
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: jru_system
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - jrunet
+
+volumes:
+  mysql_data:
+
+networks:
+  jrunet:

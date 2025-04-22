@@ -56,7 +56,7 @@ async def get_student_courses(student_id: int, db_dep=Depends(get_db)):
 
     db.execute("SELECT user_id FROM users WHERE user_id = %s AND role = 'student'", (student_id,))
     if not db.fetchone():
-        raise HTTPException(status_code=404, detail="Student not found")
+        return {"student_id": student_id, "courses": []}
 
     query = """
         SELECT c.course_id, c.course_name, c.section, c.class_schedule

@@ -337,7 +337,7 @@ CREATE TABLE `students` (
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `degree` varchar(100) NOT NULL,
-  `enrollment_date` date DEFAULT curdate()
+  `enrollment_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

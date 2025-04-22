@@ -1,12 +1,18 @@
-from fastapi import Depends, HTTPException, APIRouter, Path, Form, File, UploadFile
+from fastapi import Depends, HTTPException, APIRouter, Path, Form, File, UploadFile, FastAPI
 from pydantic import BaseModel
 import os
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from .db import get_db
 
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)  
+
+# Add FastAPI app instance and mount static files directory
+app = FastAPI()  
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 class CourseContentCreate(BaseModel):
     course_id: int
@@ -40,6 +46,9 @@ async def create_course_content(
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(file.file.read())
+        
+        # Format the file path for proper static file serving
+        file_path = f"/uploads/{file.filename}"
 
     query = "INSERT INTO course_content (course_id, title, content, file_path, user_id) VALUES (%s, %s, %s, %s, %s)"
     cursor.execute(query, (course_id, title, content, file_path, user_id))
@@ -120,6 +129,10 @@ async def update_course_content(
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(file.file.read())
+        
+        # Format the file path for proper static file serving
+        file_path = f"/uploads/{file.filename}"
+        
         query = """
             UPDATE course_content SET title = %s, content = %s, file_path = %s 
             WHERE content_id = %s
@@ -152,3 +165,14 @@ async def delete_course_content(content_id: int, db=Depends(get_db)):
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Content not found")
     return {"message": "Course content deleted successfully"}
+
+@router.get("/course-content/download/{file_name}")
+async def download_course_file(file_name: str):
+    """Download a file from the uploads directory"""
+    file_name = os.path.basename(file_name)  # Ensure we only get the filename without path
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+
+    if os.path.exists(file_path):
+        return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
+    
+    raise HTTPException(status_code=404, detail="File not found")
